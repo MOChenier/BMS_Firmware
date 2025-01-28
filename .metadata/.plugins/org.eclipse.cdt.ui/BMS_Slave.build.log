@@ -1,15 +1,10 @@
-14:51:37 **** Incremental Build of configuration Debug for project BMS_Slave ****
-make all 
-Building file: ../main.c
-Invoking: Cross GCC Compiler
-gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.o" -o "main.o" "../main.c"
-Finished building: ../main.c
- 
-Building target: BMS_Slave
-Invoking: Cross GCC Linker
-gcc  -o "BMS_Slave" ./main.o   
-Finished building target: BMS_Slave
+14:47:43 **** Incremental Build of configuration Debug for project BMS_Slave ****
+make -j16 all 
+arm-none-eabi-size  BMS_Slave.elf 
+   text	   data	    bss	    dec	    hex	filename
+   7320	     12	   1652	   8984	   2318	BMS_Slave.elf
+Finished building: default.size.stdout
  
 
-14:51:37 Build Finished. 0 errors, 0 warnings. (took 281ms)
+14:47:43 Build Finished. 0 errors, 0 warnings. (took 166ms)
 

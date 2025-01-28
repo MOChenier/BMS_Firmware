@@ -7,6 +7,5 @@
 
 #include "ignition.h"
 
-extern ADC_HandleTypeDef hadc1;
 
 

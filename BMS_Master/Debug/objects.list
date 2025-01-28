@@ -1,4 +1,6 @@
+"./Core/Src/can_bus.o"
 "./Core/Src/charger.o"
+"./Core/Src/communication.o"
 "./Core/Src/ignition.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
