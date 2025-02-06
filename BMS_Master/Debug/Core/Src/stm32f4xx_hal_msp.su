@@ -2,4 +2,14 @@
 ../Core/Src/stm32f4xx_hal_msp.c:86:6:HAL_ADC_MspInit	48	static
 ../Core/Src/stm32f4xx_hal_msp.c:120:6:HAL_ADC_MspDeInit	16	static
 ../Core/Src/stm32f4xx_hal_msp.c:148:6:HAL_CAN_MspInit	48	static
-../Core/Src/stm32f4xx_hal_msp.c:185:6:HAL_CAN_MspDeInit	16	static
+../Core/Src/stm32f4xx_hal_msp.c:189:6:HAL_CAN_MspDeInit	16	static
+../Core/Src/stm32f4xx_hal_msp.c:221:6:HAL_I2C_MspInit	56	static
+../Core/Src/stm32f4xx_hal_msp.c:289:6:HAL_I2C_MspDeInit	16	static
+../Core/Src/stm32f4xx_hal_msp.c:340:6:HAL_SD_MspInit	112	static
+../Core/Src/stm32f4xx_hal_msp.c:401:6:HAL_SD_MspDeInit	16	static
+../Core/Src/stm32f4xx_hal_msp.c:437:6:HAL_SPI_MspInit	48	static
+../Core/Src/stm32f4xx_hal_msp.c:475:6:HAL_SPI_MspDeInit	16	static
+../Core/Src/stm32f4xx_hal_msp.c:505:6:HAL_IRDA_MspInit	56	static
+../Core/Src/stm32f4xx_hal_msp.c:565:6:HAL_IRDA_MspDeInit	16	static
+../Core/Src/stm32f4xx_hal_msp.c:612:6:HAL_HCD_MspInit	104	static
+../Core/Src/stm32f4xx_hal_msp.c:659:6:HAL_HCD_MspDeInit	16	static
