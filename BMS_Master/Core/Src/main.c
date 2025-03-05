@@ -21,11 +21,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "in_op.h"
 #include "charger.h"
-#include "ignition.h"
-#include "communication.h"
 #include "can_bus.h"
+#include "misc.h"
 
 /* USER CODE END Includes */
 
@@ -56,12 +55,24 @@ SD_HandleTypeDef hsd;
 
 SPI_HandleTypeDef hspi3;
 
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
+
 IRDA_HandleTypeDef hirda1;
 IRDA_HandleTypeDef hirda6;
 
 HCD_HandleTypeDef hhcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
+extern uint8_t RxData[8];
+extern CAN_RxHeaderTypeDef   RxHeader;
+
+uint8_t master_mode = 0; // 0: Standby, 1: Charge/Balancing 2: In Operation
+
+volatile uint8_t timer_count = 0;
+
+volatile uint8_t all_connection_states = 0; // b0:ignition, b1:charger, b2:EmgcyStop
+volatile uint8_t blinking_HV_led = 0; //0: No blinking, 1: Slow blinking, 2: Fast blinking
 
 /* USER CODE END PV */
 
@@ -77,8 +88,10 @@ static void MX_USART6_IRDA_Init(void);
 static void MX_USB_OTG_FS_HCD_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_IRDA_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
-
+void ITM_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -124,7 +137,12 @@ int main(void)
   MX_USB_OTG_FS_HCD_Init();
   MX_ADC1_Init();
   MX_USART1_IRDA_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  ITM_Init(); // Init ITM to send data through ITM port 0
+
+  HAL_TIM_Base_Start_IT(&htim2); //Start Main timer (10 ms)
 
   /* USER CODE END 2 */
 
@@ -135,6 +153,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if((all_connection_states & CHARGER_CONN_MASK) != 0){
+
+		  charging_balancing_mode();
+
+
+	  }else if((all_connection_states & IGNITION_MASK) != 0){
+
+
+
+	  }
+
+
+	  master_mode = 0;
+	  HAL_Delay(MAIN_LOOP_DELAY_MS);
+
   }
   /* USER CODE END 3 */
 }
@@ -419,6 +452,96 @@ static void MX_SPI3_Init(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = PSC_1000;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = COUNTER_50MS;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = PSC_1000;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = COUNTER_50MS;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -540,17 +663,23 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO3_Pin|YELLOW_LED_Pin|RED_LED_Pin|GPIO2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : ISOLATION_FAULT_DETECT_Pin CHARGER_DETECT_Pin EMERGENCY_STOP_Pin IGNITION_Pin */
-  GPIO_InitStruct.Pin = ISOLATION_FAULT_DETECT_Pin|CHARGER_DETECT_Pin|EMERGENCY_STOP_Pin|IGNITION_Pin;
+  /*Configure GPIO pin : ISOLATION_FAULT_DETECT_Pin */
+  GPIO_InitStruct.Pin = ISOLATION_FAULT_DETECT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(ISOLATION_FAULT_DETECT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PRECHARGE_CONTACTOR_Pin MAIN_CONTACTOR_Pin GPIO0_Pin */
   GPIO_InitStruct.Pin = PRECHARGE_CONTACTOR_Pin|MAIN_CONTACTOR_Pin|GPIO0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : CHARGER_DETECT_Pin IGNITION_Pin */
+  GPIO_InitStruct.Pin = CHARGER_DETECT_Pin|IGNITION_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CURRENT_Pin */
@@ -566,6 +695,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : EMERGENCY_STOP_Pin */
+  GPIO_InitStruct.Pin = EMERGENCY_STOP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(EMERGENCY_STOP_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : ISOLATION_FAULT_DETECTB0_Pin */
   GPIO_InitStruct.Pin = ISOLATION_FAULT_DETECTB0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -579,11 +714,31 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+
+
+
+
+void ITM_Init(void) {
+    // Enable the ITM (Instrumentation Trace Macrocell)
+    ITM->TCR = ITM_TCR_ITMENA_Msk;        // Enable ITM
+    ITM->TPR = 0x0;                       // Set privilege level to 0 (default)
+    ITM->TER = 0x01;                      // Enable stimulus 0 (SWO)
+}
 
 /* USER CODE END 4 */
 

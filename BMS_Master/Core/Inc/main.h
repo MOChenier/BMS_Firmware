@@ -57,6 +57,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define COUNTER_100MS 9600
+#define COUNTER_50MS 4800
+#define PSC_1000 999
+#define COUNTER_10MS 960
 #define ISOLATION_FAULT_DETECT_Pin GPIO_PIN_13
 #define ISOLATION_FAULT_DETECT_GPIO_Port GPIOC
 #define PRECHARGE_CONTACTOR_Pin GPIO_PIN_0
@@ -67,6 +71,7 @@ void Error_Handler(void);
 #define GPIO0_GPIO_Port GPIOC
 #define CHARGER_DETECT_Pin GPIO_PIN_3
 #define CHARGER_DETECT_GPIO_Port GPIOC
+#define CHARGER_DETECT_EXTI_IRQn EXTI3_IRQn
 #define CURRENT_Pin GPIO_PIN_2
 #define CURRENT_GPIO_Port GPIOA
 #define LIGHT_Pin GPIO_PIN_3
@@ -75,8 +80,10 @@ void Error_Handler(void);
 #define CHANNEL_STATUS_GPIO_Port GPIOA
 #define EMERGENCY_STOP_Pin GPIO_PIN_4
 #define EMERGENCY_STOP_GPIO_Port GPIOC
+#define EMERGENCY_STOP_EXTI_IRQn EXTI4_IRQn
 #define IGNITION_Pin GPIO_PIN_5
 #define IGNITION_GPIO_Port GPIOC
+#define IGNITION_EXTI_IRQn EXTI9_5_IRQn
 #define ISOLATION_FAULT_DETECTB0_Pin GPIO_PIN_0
 #define ISOLATION_FAULT_DETECTB0_GPIO_Port GPIOB
 #define LV_BATTERY_VOLTAGE_Pin GPIO_PIN_1
@@ -99,6 +106,20 @@ void Error_Handler(void);
 #define GPIO2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
+//Number of 10 ms periods. Are used in timers.
+#define HB_10MS_PERIODS 50
+#define CHARGER_CONNECTION_10MS_PERIODS 10
+#define ASK_SLAVE_FOR_INFO_10MS_PERIODS 5
+#define SLOW_BLINKING_HV_10MS_PERIODS 50
+#define FAST_BLINKING_HV_10MS_PERIODS 10
+
+#define MAIN_LOOP_DELAY_MS 20
+
+#define TIMER_MAX 1000
+
+#define IGNITION_MASK		0x01
+#define CHARGER_CONN_MASK	0x02
+#define EMERGENCY_STOP_MASK 0x04
 
 /* USER CODE END Private defines */
 

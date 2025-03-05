@@ -60,8 +60,8 @@ all: main-build
 main-build: BMS_Master.elf secondary-outputs
 
 # Tool invocations
-BMS_Master.elf BMS_Master.map: $(OBJS) $(USER_OBJS) /home/marco/STM32CubeIDE/workspace_1.17.0/BMS_Firmware/BMS_Master/STM32F412RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "BMS_Master.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/marco/STM32CubeIDE/workspace_1.17.0/BMS_Firmware/BMS_Master/STM32F412RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="BMS_Master.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+BMS_Master.elf BMS_Master.map: $(OBJS) $(USER_OBJS) /home/marco/STM32CubeIDE/workspace_1.17.0_/BMS_Firmware/BMS_Master/STM32F412RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "BMS_Master.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/marco/STM32CubeIDE/workspace_1.17.0_/BMS_Firmware/BMS_Master/STM32F412RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="BMS_Master.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
