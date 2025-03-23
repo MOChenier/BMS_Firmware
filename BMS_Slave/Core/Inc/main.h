@@ -83,6 +83,10 @@ void Error_Handler(void);
 #define BalanceEnableCell8_GPIO_Port GPIOB
 #define BalanceEnableCell9_Pin GPIO_PIN_12
 #define BalanceEnableCell9_GPIO_Port GPIOB
+#define BMS_SCL_Pin GPIO_PIN_13
+#define BMS_SCL_GPIO_Port GPIOB
+#define BMS_SDA_Pin GPIO_PIN_14
+#define BMS_SDA_GPIO_Port GPIOB
 #define BMS_Alert_Pin GPIO_PIN_15
 #define BMS_Alert_GPIO_Port GPIOB
 #define BalanceEnableCell10_Pin GPIO_PIN_8
