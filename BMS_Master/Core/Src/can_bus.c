@@ -7,7 +7,6 @@
 
 #include "can_bus.h"
 
-
 CAN_TxHeaderTypeDef	TxHeader;
 uint8_t		TxData[2];
 uint32_t	TxMailbox;
@@ -17,10 +16,8 @@ uint8_t               RxData[8];
 
 uint8_t RxDatacheck = 0; //Flag that indicates that a message has been received
 
-int CAN1_send_mess(CAN_HandleTypeDef *hcan, uint8_t TxData[TxDLC])
+int CAN1_send_mess(CAN_HandleTypeDef *hcan, uint8_t *TxData)
 {
-
-    CAN_init();
 
 	if (HAL_CAN_AddTxMessage(hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
 	{
@@ -55,7 +52,7 @@ slave_return_t convert_to_struct(uint8_t RxData[8])
 // Following functions are used for configuration
 
 
-void CAN_init()
+void CAN_init_header()
 {
 
 	TxHeader.IDE = CAN_ID_STD;
@@ -63,7 +60,27 @@ void CAN_init()
 	TxHeader.RTR = CAN_RTR_DATA;
 	TxHeader.DLC = TxDLC;
 
+
 }
+
+void CAN_set_std_header(uint16_t std_tx_id, uint8_t dlc)
+{
+
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.StdId = std_tx_id;
+	TxHeader.DLC = dlc;
+
+}
+
+void CAN_set_ext_header(uint32_t ext_tx_id, uint8_t dlc)
+{
+
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.ExtId = ext_tx_id;
+	TxHeader.DLC = dlc;
+
+}
+
 
 
 void CAN_Error_Handler(void)
