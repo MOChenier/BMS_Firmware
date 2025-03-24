@@ -1,0 +1,5 @@
+../Core/Src/cell_monitoring.c:15:6:Task_cell_motoring	56	static
+../Core/Src/cell_monitoring.c:33:10:ReadPackTemp	32	static
+../Core/Src/cell_monitoring.c:41:10:ReadCellVoltage	32	static
+../Core/Src/cell_monitoring.c:49:19:BQ76940_WriteRegister	32	static
+../Core/Src/cell_monitoring.c:55:19:BQ76940_ReadRegister	40	static

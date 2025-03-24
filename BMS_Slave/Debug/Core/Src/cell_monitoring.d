@@ -1,5 +1,5 @@
 Core/Src/cell_monitoring.o: ../Core/Src/cell_monitoring.c \
- ../Core/Inc/cell_monitoring.h ../Core/Inc/can_bus.h \
+ ../Core/Inc/cell_monitoring.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h \
  ../Core/Inc/stm32g0xx_hal_conf.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_rcc.h \
@@ -33,10 +33,8 @@ Core/Src/cell_monitoring.o: ../Core/Src/cell_monitoring.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c_ex.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr.h \
- ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h \
- ../Core/Inc/main.h
+ ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h
 ../Core/Inc/cell_monitoring.h:
-../Core/Inc/can_bus.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_rcc.h:
@@ -71,4 +69,3 @@ Core/Src/cell_monitoring.o: ../Core/Src/cell_monitoring.c \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c_ex.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h:
-../Core/Inc/main.h:

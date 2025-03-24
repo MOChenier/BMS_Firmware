@@ -103,6 +103,8 @@ void Error_Handler(void);
 #define YELLOW_LED_GPIO_Port GPIOA
 #define RED_LED_Pin GPIO_PIN_5
 #define RED_LED_GPIO_Port GPIOB
+#define BalaResCheck_Pin GPIO_PIN_6
+#define BalaResCheck_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
