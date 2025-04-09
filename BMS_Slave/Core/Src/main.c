@@ -18,11 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cell_monitoring.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,27 +47,6 @@ FDCAN_HandleTypeDef hfdcan2;
 I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c3;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityLow,
-  .stack_size = 128 * 4
-};
-/* Definitions for HeartBeat_Task */
-osThreadId_t HeartBeat_TaskHandle;
-const osThreadAttr_t HeartBeat_Task_attributes = {
-  .name = "HeartBeat_Task",
-  .priority = (osPriority_t) osPriorityLow,
-  .stack_size = 128 * 4
-};
-/* Definitions for Cell_Monitoring */
-osThreadId_t Cell_MonitoringHandle;
-const osThreadAttr_t Cell_Monitoring_attributes = {
-  .name = "Cell_Monitoring",
-  .priority = (osPriority_t) osPriorityHigh,
-  .stack_size = 128 * 4
-};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -80,10 +58,6 @@ static void MX_ADC1_Init(void);
 static void MX_FDCAN2_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_I2C2_Init(void);
-void StartDefaultTask(void *argument);
-void HB_Task(void *argument);
-extern void Cell_Motoring_Task(void *argument);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -130,54 +104,12 @@ int main(void)
 
   /* USER CODE END 2 */
 
-  /* Init scheduler */
-  osKernelInitialize();
-
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
-  /* creation of HeartBeat_Task */
-  HeartBeat_TaskHandle = osThreadNew(HB_Task, NULL, &HeartBeat_Task_attributes);
-
-  /* creation of Cell_Monitoring */
-  Cell_MonitoringHandle = osThreadNew(Cell_Motoring_Task, NULL, &Cell_Monitoring_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-
+	Cell_Motoring_Task();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -347,7 +279,7 @@ static void MX_I2C2_Init(void)
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c2.Init.OwnAddress2 = 0;
   hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_ENABLE;
   hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c2) != HAL_OK)
   {
@@ -429,8 +361,8 @@ static void MX_I2C3_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -439,7 +371,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, BMS_BOOT_Pin|BalanceEnableCell0_Pin|BalanceEnableCell1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, BalanceEnableCell0_Pin|BalanceEnableCell1_Pin|BMS_BOOT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, BalanceEnableCell2_Pin|BalanceEnableCell3_Pin|BalanceEnableCell4_Pin|BalanceEnableCell5_Pin
@@ -448,13 +380,6 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, BalanceEnableCell8_Pin|BalanceEnableCell9_Pin|RED_LED_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : BMS_BOOT_Pin */
-  GPIO_InitStruct.Pin = BMS_BOOT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(BMS_BOOT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BalanceEnableCell0_Pin BalanceEnableCell1_Pin */
   GPIO_InitStruct.Pin = BalanceEnableCell0_Pin|BalanceEnableCell1_Pin;
@@ -504,11 +429,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(BalanceEnableCell9_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : BMS_Alert_Pin */
-  GPIO_InitStruct.Pin = BMS_Alert_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pin : BMS_ALERT_Pin */
+  GPIO_InitStruct.Pin = BMS_ALERT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(BMS_Alert_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(BMS_ALERT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : BMS_BOOT_Pin */
+  GPIO_InitStruct.Pin = BMS_BOOT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(BMS_BOOT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BalanceEnableCell12_Pin BalanceEnableCell14_Pin */
   GPIO_InitStruct.Pin = BalanceEnableCell12_Pin|BalanceEnableCell14_Pin;
@@ -523,8 +455,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BalaResCheck_GPIO_Port, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -532,47 +464,6 @@ static void MX_GPIO_Init(void)
 
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-__weak void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-
-	// Red LED
-	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
-    //osDelay(500);
-  }
-  /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_HB_Task */
-/**
-* @brief Function implementing the HeartBeat_Task thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_HB_Task */
-void HB_Task(void *argument)
-{
-  /* USER CODE BEGIN HB_Task */
-  /* Infinite loop */
-  for(;;)
-  {
-	// Red LED
-	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
-	//osDelay(500);
-  }
-  /* USER CODE END HB_Task */
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.

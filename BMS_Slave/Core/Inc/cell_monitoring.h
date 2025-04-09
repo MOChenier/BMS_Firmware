@@ -37,11 +37,14 @@ uint16_t ReadCellVoltage(uint8_t cell_reg_LSB);
 HAL_StatusTypeDef BQ76940_WriteRegister(uint8_t reg, uint8_t data);
 HAL_StatusTypeDef BQ76940_ReadRegister(uint8_t reg, uint8_t *data);
 
+HAL_StatusTypeDef TEST_I2C();
+
+
 // IMPORTED CODE FROM TE
 
 
 
-#define BQMAXIMO (0x08 << 1)
+#define BQMAXIMO 8
 
 #define LOWBYTE(Data) (unsigned char)(0x00ff & Data)
 

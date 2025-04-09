@@ -30,40 +30,41 @@ int iGain = 0;
 
 void Cell_Motoring_Task(){
 
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	vTaskDelay(20);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-	vTaskDelay(20);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	vTaskDelay(20);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
+	HAL_Delay(2000);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
+	HAL_Delay(2000);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
+	HAL_Delay(2000);
 
-	//vTaskDelay(1000);
-    int init_status = InitialisebqMaximo();
-	int Result;
-	//vTaskDelay(1000);
-	uint8_t data = 0;
+	HAL_StatusTypeDef init_status = HAL_OK;
+	HAL_StatusTypeDef import_status = HAL_OK;
+
+
+	init_status = TEST_I2C();
+
+
+	init_status = InitialisebqMaximo();
 
 	for(;;){
 
-	    if (HAL_I2C_IsDeviceReady(&hi2c2, BQ76940_ADDR, 3, HAL_MAX_DELAY) == HAL_OK)
+	    if (HAL_I2C_IsDeviceReady(&hi2c2, BQ76940_ADDR, 3, 1000) == HAL_OK)
 	    {
-//	    	if (HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, 0x00, 1, &data, 1, 100) == HAL_OK){
-			Result = UpdateVoltageFromBqMaximo();
+
+	    	import_status = UpdateVoltageFromBqMaximo();
 			// Red LED
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
-			vTaskDelay(1000);
-
-//	    	}
+			HAL_Delay(1000);
 
 	    }
 		else
 		{
 			// Yellow LED
 			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
-			vTaskDelay(1000);
+			HAL_Delay(1000);
 	    }
 
-	vTaskDelay(100);
+	HAL_Delay(100);
 	}
 }
 
@@ -295,10 +296,55 @@ int I2CWriteBlockWithCRC(uint8_t I2CSlaveAddress, uint8_t StartAddress, uint8_t 
 }
 
 
+HAL_StatusTypeDef TEST_I2C()
+{
+    HAL_StatusTypeDef WriteStatus = HAL_OK;
+
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x30, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x00, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x08, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x08 << 1, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x18, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x18 << 1, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, BQ76940_ADDR, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, BQMAXIMO, 5, HAL_MAX_DELAY);
+    HAL_Delay(100);
+
+    //WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, BQ76940_ADDR, 0x00, 2, HAL_MAX_DELAY);
+    //vTaskDelay(100);
+    //WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, BQMAXIMO, 0x00, 2, HAL_MAX_DELAY);
+    //vTaskDelay(100);
+
+    uint8_t data;
+    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, 0, 1, &data, 1, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, 0, 1, &data, 1, HAL_MAX_DELAY);
+    HAL_Delay(100);
+
+
+    WriteStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, 0, 1, 0, 1, HAL_MAX_DELAY);
+    HAL_Delay(100);
+    WriteStatus = HAL_I2C_Mem_Write(&hi2c2, BQMAXIMO, 0, 1, 0, 1, HAL_MAX_DELAY);
+    HAL_Delay(100);
+
+    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
+
+	return WriteStatus;
+}
+
+
 HAL_StatusTypeDef GetADCGainOffset()
 {
     HAL_StatusTypeDef WriteStatus = HAL_OK;
 
+    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
 
     WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
     WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN2, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain2.ADCGain2Byte), 1, HAL_MAX_DELAY);

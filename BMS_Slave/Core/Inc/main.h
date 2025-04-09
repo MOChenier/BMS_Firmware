@@ -57,8 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BMS_BOOT_Pin GPIO_PIN_13
-#define BMS_BOOT_GPIO_Port GPIOC
 #define BalanceEnableCell0_Pin GPIO_PIN_14
 #define BalanceEnableCell0_GPIO_Port GPIOC
 #define BalanceEnableCell1_Pin GPIO_PIN_15
@@ -87,12 +85,14 @@ void Error_Handler(void);
 #define BMS_SCL_GPIO_Port GPIOB
 #define BMS_SDA_Pin GPIO_PIN_14
 #define BMS_SDA_GPIO_Port GPIOB
-#define BMS_Alert_Pin GPIO_PIN_15
-#define BMS_Alert_GPIO_Port GPIOB
+#define BMS_ALERT_Pin GPIO_PIN_15
+#define BMS_ALERT_GPIO_Port GPIOB
 #define BalanceEnableCell10_Pin GPIO_PIN_8
 #define BalanceEnableCell10_GPIO_Port GPIOA
 #define BalanceEnableCell11_Pin GPIO_PIN_9
 #define BalanceEnableCell11_GPIO_Port GPIOA
+#define BMS_BOOT_Pin GPIO_PIN_6
+#define BMS_BOOT_GPIO_Port GPIOC
 #define BalanceEnableCell12_Pin GPIO_PIN_10
 #define BalanceEnableCell12_GPIO_Port GPIOA
 #define BalanceEnableCell13_Pin GPIO_PIN_11
