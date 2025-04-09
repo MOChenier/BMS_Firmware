@@ -52,7 +52,21 @@ I2C_HandleTypeDef hi2c3;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow,
+  .stack_size = 128 * 4
+};
+/* Definitions for HeartBeat_Task */
+osThreadId_t HeartBeat_TaskHandle;
+const osThreadAttr_t HeartBeat_Task_attributes = {
+  .name = "HeartBeat_Task",
+  .priority = (osPriority_t) osPriorityLow,
+  .stack_size = 128 * 4
+};
+/* Definitions for Cell_Monitoring */
+osThreadId_t Cell_MonitoringHandle;
+const osThreadAttr_t Cell_Monitoring_attributes = {
+  .name = "Cell_Monitoring",
+  .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 128 * 4
 };
 /* USER CODE BEGIN PV */
@@ -67,6 +81,8 @@ static void MX_FDCAN2_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_I2C2_Init(void);
 void StartDefaultTask(void *argument);
+void HB_Task(void *argument);
+extern void Cell_Motoring_Task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -136,6 +152,12 @@ int main(void)
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of HeartBeat_Task */
+  HeartBeat_TaskHandle = osThreadNew(HB_Task, NULL, &HeartBeat_Task_attributes);
+
+  /* creation of Cell_Monitoring */
+  Cell_MonitoringHandle = osThreadNew(Cell_Motoring_Task, NULL, &Cell_Monitoring_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -320,7 +342,7 @@ static void MX_I2C2_Init(void)
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
   hi2c2.Init.Timing = 0x00503D58;
-  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.OwnAddress1 = 16;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c2.Init.OwnAddress2 = 0;
@@ -417,7 +439,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, BalanceEnableCell0_Pin|BalanceEnableCell1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, BMS_BOOT_Pin|BalanceEnableCell0_Pin|BalanceEnableCell1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, BalanceEnableCell2_Pin|BalanceEnableCell3_Pin|BalanceEnableCell4_Pin|BalanceEnableCell5_Pin
@@ -429,8 +451,9 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : BMS_BOOT_Pin */
   GPIO_InitStruct.Pin = BMS_BOOT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(BMS_BOOT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BalanceEnableCell0_Pin BalanceEnableCell1_Pin */
@@ -484,7 +507,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : BMS_Alert_Pin */
   GPIO_InitStruct.Pin = BMS_Alert_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(BMS_Alert_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BalanceEnableCell12_Pin BalanceEnableCell14_Pin */
@@ -506,6 +529,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -515,15 +540,38 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+__weak void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+
+	// Red LED
+	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
+    //osDelay(500);
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_HB_Task */
+/**
+* @brief Function implementing the HeartBeat_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_HB_Task */
+void HB_Task(void *argument)
+{
+  /* USER CODE BEGIN HB_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+	// Red LED
+	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
+	//osDelay(500);
+  }
+  /* USER CODE END HB_Task */
 }
 
 /**

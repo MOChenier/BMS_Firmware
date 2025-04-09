@@ -1,0 +1,2 @@
+../Core/Src/balancing.c:14:6:Task_balancing	24	static
+../Core/Src/balancing.c:45:6:set_balancing	24	static

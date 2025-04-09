@@ -1,5 +1,10 @@
-../Core/Src/cell_monitoring.c:15:6:Task_cell_motoring	56	static
-../Core/Src/cell_monitoring.c:33:10:ReadPackTemp	32	static
-../Core/Src/cell_monitoring.c:41:10:ReadCellVoltage	32	static
-../Core/Src/cell_monitoring.c:49:19:BQ76940_WriteRegister	32	static
-../Core/Src/cell_monitoring.c:55:19:BQ76940_ReadRegister	40	static
+../Core/Src/cell_monitoring.c:31:6:Cell_Motoring_Task	24	static
+../Core/Src/cell_monitoring.c:71:19:BQ76940_ReadRegister	40	static
+../Core/Src/cell_monitoring.c:79:15:CRC8	24	static
+../Core/Src/cell_monitoring.c:104:5:ReadRegisterWithCRC	56	static
+../Core/Src/cell_monitoring.c:146:5:I2CReadBlockWithCRC	112	static
+../Core/Src/cell_monitoring.c:223:5:I2CWriteBlockWithCRC	80	static
+../Core/Src/cell_monitoring.c:298:19:GetADCGainOffset	40	static
+../Core/Src/cell_monitoring.c:314:19:ConfigureBqMaximo	16	static
+../Core/Src/cell_monitoring.c:335:19:InitialisebqMaximo	24	static
+../Core/Src/cell_monitoring.c:359:19:UpdateVoltageFromBqMaximo	40	static
