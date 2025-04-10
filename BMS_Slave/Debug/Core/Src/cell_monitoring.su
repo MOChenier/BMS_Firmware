@@ -1,7 +1,6 @@
-../Core/Src/cell_monitoring.c:31:6:Cell_Motoring_Task	24	static
-../Core/Src/cell_monitoring.c:73:19:BQ76940_ReadRegister	40	static
-../Core/Src/cell_monitoring.c:81:19:GetADCGainOffset	40	static
-../Core/Src/cell_monitoring.c:92:19:ConfigureBqMaximo	40	static
-../Core/Src/cell_monitoring.c:119:19:InitialisebqMaximo	24	static
-../Core/Src/cell_monitoring.c:143:19:UpdateVoltageFromBqMaximo	56	static
-../Core/Src/cell_monitoring.c:166:19:UpdateTempertureFromBqMaximo	56	static
+../Core/Src/cell_monitoring.c:31:6:Cell_Motoring_Task	16	static
+../Core/Src/cell_monitoring.c:73:19:GetADCGainOffset	32	static
+../Core/Src/cell_monitoring.c:84:19:ConfigureBqMaximo	32	static
+../Core/Src/cell_monitoring.c:111:19:InitialisebqMaximo	16	static
+../Core/Src/cell_monitoring.c:135:19:UpdateVoltageFromBqMaximo	56	static
+../Core/Src/cell_monitoring.c:158:19:UpdateTempertureFromBqMaximo	56	static

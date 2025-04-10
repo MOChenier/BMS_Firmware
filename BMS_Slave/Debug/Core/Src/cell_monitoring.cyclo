@@ -1,7 +1,6 @@
 ../Core/Src/cell_monitoring.c:31:6:Cell_Motoring_Task	2
-../Core/Src/cell_monitoring.c:73:19:BQ76940_ReadRegister	2
-../Core/Src/cell_monitoring.c:81:19:GetADCGainOffset	1
-../Core/Src/cell_monitoring.c:92:19:ConfigureBqMaximo	6
-../Core/Src/cell_monitoring.c:119:19:InitialisebqMaximo	1
-../Core/Src/cell_monitoring.c:143:19:UpdateVoltageFromBqMaximo	2
-../Core/Src/cell_monitoring.c:166:19:UpdateTempertureFromBqMaximo	2
+../Core/Src/cell_monitoring.c:73:19:GetADCGainOffset	1
+../Core/Src/cell_monitoring.c:84:19:ConfigureBqMaximo	6
+../Core/Src/cell_monitoring.c:111:19:InitialisebqMaximo	1
+../Core/Src/cell_monitoring.c:135:19:UpdateVoltageFromBqMaximo	2
+../Core/Src/cell_monitoring.c:158:19:UpdateTempertureFromBqMaximo	2
