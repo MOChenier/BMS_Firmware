@@ -31,20 +31,19 @@ extern uint16_t pack_temps[NB_TEMP_SENS];
 
 void Task_cell_motoring();
 
-uint16_t ReadPackTemp(uint8_t sens_reg_LSB);
-uint16_t ReadCellVoltage(uint8_t cell_reg_LSB);
+HAL_StatusTypeDef GetADCGainOffset();
+HAL_StatusTypeDef ConfigureBqMaximo();
+HAL_StatusTypeDef InitialisebqMaximo();
+HAL_StatusTypeDef UpdateVoltageFromBqMaximo();
+HAL_StatusTypeDef UpdateTempertureFromBqMaximo();
 
-HAL_StatusTypeDef BQ76940_WriteRegister(uint8_t reg, uint8_t data);
-HAL_StatusTypeDef BQ76940_ReadRegister(uint8_t reg, uint8_t *data);
-
-HAL_StatusTypeDef TEST_I2C();
 
 
 // IMPORTED CODE FROM TE
 
 
 
-#define BQMAXIMO 8
+#define BQMAXIMO (0x08 << 1)
 
 #define LOWBYTE(Data) (unsigned char)(0x00ff & Data)
 
@@ -132,19 +131,6 @@ HAL_StatusTypeDef TEST_I2C();
 
 #define LOW_BYTE(Data)			(unsigned char)(0xff & Data)
 #define HIGH_BYTE(Data)			(unsigned char)(0xff & (Data >> 8))
-
-
-unsigned char CRC8(unsigned char *ptr, unsigned char len,unsigned char key);
-
-int I2CWriteRegisterByteWithCRC(unsigned char I2CSlaveAddress, unsigned char Register, unsigned char Data);
-
-int I2CReadRegisterWordWithCRC(unsigned char I2CSlaveAddress, unsigned char Register, unsigned int *Data);
-
-HAL_StatusTypeDef GetADCGainOffset();
-HAL_StatusTypeDef ConfigureBqMaximo();
-HAL_StatusTypeDef InitialisebqMaximo();
-HAL_StatusTypeDef UpdateVoltageFromBqMaximo();
-
 
 typedef struct _Register_Group
 {

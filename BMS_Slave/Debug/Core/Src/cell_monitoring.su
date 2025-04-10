@@ -1,11 +1,7 @@
 ../Core/Src/cell_monitoring.c:31:6:Cell_Motoring_Task	24	static
-../Core/Src/cell_monitoring.c:72:19:BQ76940_ReadRegister	40	static
-../Core/Src/cell_monitoring.c:80:15:CRC8	24	static
-../Core/Src/cell_monitoring.c:105:5:ReadRegisterWithCRC	56	static
-../Core/Src/cell_monitoring.c:147:5:I2CReadBlockWithCRC	112	static
-../Core/Src/cell_monitoring.c:224:5:I2CWriteBlockWithCRC	80	static
-../Core/Src/cell_monitoring.c:299:19:TEST_I2C	40	static
-../Core/Src/cell_monitoring.c:343:19:GetADCGainOffset	40	static
-../Core/Src/cell_monitoring.c:360:19:ConfigureBqMaximo	16	static
-../Core/Src/cell_monitoring.c:381:19:InitialisebqMaximo	24	static
-../Core/Src/cell_monitoring.c:405:19:UpdateVoltageFromBqMaximo	40	static
+../Core/Src/cell_monitoring.c:73:19:BQ76940_ReadRegister	40	static
+../Core/Src/cell_monitoring.c:81:19:GetADCGainOffset	40	static
+../Core/Src/cell_monitoring.c:92:19:ConfigureBqMaximo	40	static
+../Core/Src/cell_monitoring.c:119:19:InitialisebqMaximo	24	static
+../Core/Src/cell_monitoring.c:143:19:UpdateVoltageFromBqMaximo	56	static
+../Core/Src/cell_monitoring.c:166:19:UpdateTempertureFromBqMaximo	56	static

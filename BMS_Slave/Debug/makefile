@@ -60,8 +60,8 @@ all: main-build
 main-build: BMS_Slave.elf secondary-outputs
 
 # Tool invocations
-BMS_Slave.elf BMS_Slave.map: $(OBJS) $(USER_OBJS) C:\Users\alexi\Desktop\PFE\BMS_Firmware\BMS_Slave\STM32G0B1CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "BMS_Slave.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\alexi\Desktop\PFE\BMS_Firmware\BMS_Slave\STM32G0B1CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="BMS_Slave.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+BMS_Slave.elf BMS_Slave.map: $(OBJS) $(USER_OBJS) C:\Users\alexi\Documents\GitHub\BMS_Firmware\BMS_Slave\STM32G0B1CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "BMS_Slave.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\alexi\Documents\GitHub\BMS_Firmware\BMS_Slave\STM32G0B1CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="BMS_Slave.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

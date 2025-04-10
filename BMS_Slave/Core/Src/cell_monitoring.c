@@ -41,7 +41,7 @@ void Cell_Motoring_Task(){
 	HAL_StatusTypeDef import_status = HAL_OK;
 
 
-	init_status = TEST_I2C();
+	//init_status = TEST_I2C();
 
 
 	init_status = InitialisebqMaximo();
@@ -52,6 +52,7 @@ void Cell_Motoring_Task(){
 	    {
 
 	    	import_status = UpdateVoltageFromBqMaximo();
+	    	import_status = UpdateTempertureFromBqMaximo();
 			// Red LED
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
 			HAL_Delay(1000);
@@ -77,294 +78,31 @@ HAL_StatusTypeDef BQ76940_ReadRegister(uint8_t reg, uint8_t *data) {
 }
 
 
-unsigned char CRC8(unsigned char *ptr, unsigned char len,unsigned char key)
-{
-	unsigned char i;
-	unsigned char crc_var=0;
-	while(len--!=0)
-	{
-		for(i=0x80; i!=0; i/=2)
-		{
-			if((crc_var & 0x80) != 0)
-			{
-				crc_var *= 2;
-				crc_var ^= key;
-			}
-			else
-				crc_var *= 2;
-
-			if((*ptr & i)!=0)
-				crc_var ^= key;
-		}
-		ptr++;
-	}
-	return(crc_var);
-}
-
-
-int ReadRegisterWithCRC(uint8_t I2CSlaveAddress, uint8_t Register, uint8_t *Data)
-{
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
-    HAL_StatusTypeDef ReadStatus = HAL_OK;
-    uint8_t ReadData[2];            // [0] = actual data, [1] = CRC from slave
-    uint8_t CRCInput[2];            // For manual CRC check
-    uint8_t CRC_val = 0;
-
-    // Step 1: Send the register address to read from
-    WriteStatus = HAL_I2C_Master_Transmit(&hi2c2,
-                                          I2CSlaveAddress << 1,
-                                          &Register,
-                                          1,
-										  HAL_MAX_DELAY);
-
-    // Step 2: Read 2 bytes (data + CRC)
-    ReadStatus = HAL_I2C_Master_Receive(&hi2c2,
-                                        (I2CSlaveAddress << 1) | 0x01,
-                                        ReadData,
-                                        2,
-										HAL_MAX_DELAY);
-
-    // Step 3: Error check
-    if (WriteStatus != HAL_OK || ReadStatus != HAL_OK)
-    {
-        return -1;
-    }
-
-    // Step 4: CRC check
-    CRCInput[0] = (I2CSlaveAddress << 1) | 0x01; // Read address with R/W bit set
-    CRCInput[1] = ReadData[0];                  // Only the data byte
-
-    CRC_val = CRC8(CRCInput, 2, CRC_KEY);       // Your CRC8 function
-
-    if (CRC_val != ReadData[1])
-    {
-        return -1; // CRC mismatch
-    }
-
-    *Data = ReadData[0]; // Output the valid data
-    return 0;
-}
-int I2CReadBlockWithCRC(uint8_t I2CSlaveAddress, uint8_t Register, uint8_t *Buffer, uint8_t Length)
-{
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
-    HAL_StatusTypeDef ReadStatus = HAL_OK;
-
-    uint8_t TargetRegister = Register;
-    uint8_t ReadData[64];  // Max expected Length = 32 (adjust size as needed)
-
-    if (Length > 32)  // Prevent buffer overrun
-        return -1;
-
-    // Send the register address
-    WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, I2CSlaveAddress << 1, &TargetRegister, 1, HAL_MAX_DELAY);
-    if (WriteStatus != HAL_OK)
-        return -1;
-
-    // Read Length bytes (without CRC)
-    ReadStatus = HAL_I2C_Master_Receive(&hi2c2, (I2CSlaveAddress << 1) | 0x01, ReadData, Length, HAL_MAX_DELAY);
-    if (ReadStatus != HAL_OK)
-        return -1;
-
-    // Copy received data to buffer
-    for (int i = 0; i < Length; i++)
-    {
-        Buffer[i] = ReadData[i];
-    }
-
-    return 0;
-	/*
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
-    HAL_StatusTypeDef ReadStatus = HAL_OK;
-
-    uint8_t TargetRegister = Register;
-    uint8_t ReadData[64];  // 2 * max expected Length (adjust size as needed)
-    uint8_t CRC_val = 0;
-    uint8_t CRCInput[2];
-    int i;
-
-    if (Length > 32)  // Prevent buffer overrun
-        return -1;
-
-    // Send the register address
-    WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, I2CSlaveAddress << 1, &TargetRegister, 1, HAL_MAX_DELAY);
-    if (WriteStatus != HAL_OK)
-        return -1;
-
-    // Read 2 * Length bytes (data + CRC for each byte)
-    ReadStatus = HAL_I2C_Master_Receive(&hi2c2, (I2CSlaveAddress << 1) | 0x01, ReadData, 2 * Length, HAL_MAX_DELAY);
-    if (ReadStatus != HAL_OK)
-        return -1;
-
-    // First byte uses special CRC input
-    CRCInput[0] = (I2CSlaveAddress << 1) | 0x01;
-    CRCInput[1] = ReadData[0];
-    CRC_val = CRC8(CRCInput, 2, CRC_KEY);
-
-    if (CRC_val != ReadData[1])
-        return -1;
-
-    Buffer[0] = ReadData[0];
-
-    // Remaining bytes
-    for (i = 1; i < Length; i++)
-    {
-        uint8_t data = ReadData[2 * i];
-        uint8_t received_crc = ReadData[2 * i + 1];
-
-        CRC_val = CRC8(&data, 1, CRC_KEY);
-        if (CRC_val != received_crc)
-            return -1;
-
-        Buffer[i] = data;
-    }
-
-    return 0;
-    */
-}
-int I2CWriteBlockWithCRC(uint8_t I2CSlaveAddress, uint8_t StartAddress, uint8_t *Buffer, uint8_t Length)
-{
-
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
-
-    uint8_t BufferToSend[32 + 1]; // Max Length = 32 → (1 + 32) = 33 bytes
-    uint8_t i;
-
-    if (Length > 32)  // Prevent buffer overflow
-        return -1;
-
-    // First byte: Start address
-    BufferToSend[0] = StartAddress;
-
-    // Copy data bytes into BufferToSend
-    for (i = 0; i < Length; i++)
-    {
-        BufferToSend[i + 1] = Buffer[i];
-    }
-
-    // Send data starting from StartAddress
-    // Total size = 1 (Start Address) + Length (Data Bytes)
-    WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, I2CSlaveAddress << 1, BufferToSend, 1 + Length, HAL_MAX_DELAY);
-
-    if (WriteStatus != HAL_OK)
-        return -1;
-
-    return 0;
-
-	/*
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
-
-    // 2*Length (data + CRC for each byte) + 1 for address
-    uint8_t BufferCRC[66]; // Max Length = 32 → (2*32 + 2) = 66
-    uint8_t i;
-    uint8_t *Pointer = BufferCRC;
-
-    if (Length > 32)  // Prevent buffer overflow
-        return -1;
-
-    // First byte: Start address
-    *Pointer++ = StartAddress;
-
-    // Compute first data byte and its CRC
-    *Pointer = Buffer[0];
-    Pointer++;
-
-    BufferCRC[0] = I2CSlaveAddress << 1;  // Used only for CRC input
-    BufferCRC[1] = StartAddress;
-    BufferCRC[2] = Buffer[0];
-    *Pointer = CRC8(BufferCRC, 3, CRC_KEY);
-    Pointer++;
-
-    // Remaining bytes
-    for (i = 1; i < Length; i++)
-    {
-        *Pointer = Buffer[i];
-        Pointer++;
-        *Pointer = CRC8(&Buffer[i], 1, CRC_KEY);
-        Pointer++;
-    }
-
-    // Send data starting from StartAddress (already stored in BufferCRC[0])
-    // Total size = 1 + (2 * Length)
-    WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, I2CSlaveAddress << 1, BufferCRC, 1 + (2 * Length), HAL_MAX_DELAY);
-
-    if (WriteStatus != HAL_OK)
-        return -1;
-
-    return 0;
-
-   */
-}
-
-
-HAL_StatusTypeDef TEST_I2C()
-{
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
-
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x30, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x00, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x08, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x08 << 1, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x18, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, 0x18 << 1, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, BQ76940_ADDR, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_IsDeviceReady(&hi2c2, BQMAXIMO, 5, HAL_MAX_DELAY);
-    HAL_Delay(100);
-
-    //WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, BQ76940_ADDR, 0x00, 2, HAL_MAX_DELAY);
-    //vTaskDelay(100);
-    //WriteStatus = HAL_I2C_Master_Transmit(&hi2c2, BQMAXIMO, 0x00, 2, HAL_MAX_DELAY);
-    //vTaskDelay(100);
-
-    uint8_t data;
-    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, 0, 1, &data, 1, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, 0, 1, &data, 1, HAL_MAX_DELAY);
-    HAL_Delay(100);
-
-
-    WriteStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, 0, 1, 0, 1, HAL_MAX_DELAY);
-    HAL_Delay(100);
-    WriteStatus = HAL_I2C_Mem_Write(&hi2c2, BQMAXIMO, 0, 1, 0, 1, HAL_MAX_DELAY);
-    HAL_Delay(100);
-
-    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
-
-	return WriteStatus;
-}
-
-
 HAL_StatusTypeDef GetADCGainOffset()
 {
     HAL_StatusTypeDef WriteStatus = HAL_OK;
 
-    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
-
     WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
     WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN2, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain2.ADCGain2Byte), 1, HAL_MAX_DELAY);
     WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCOFFSET, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCOffset), 1, HAL_MAX_DELAY);
-
-	//result = ReadRegisterWithCRC(BQMAXIMO, ADCGAIN1, &(Registers.ADCGain1.ADCGain1Byte));
-	//result = ReadRegisterWithCRC(BQMAXIMO, ADCGAIN2, &(Registers.ADCGain2.ADCGain2Byte));
-	//result = ReadRegisterWithCRC(BQMAXIMO, ADCOFFSET, &(Registers.ADCOffset));
 
 	return WriteStatus;
 }
 
 HAL_StatusTypeDef ConfigureBqMaximo()
 {
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
+    HAL_StatusTypeDef ConfigStatus = HAL_OK;
 	unsigned char bqMaximoProtectionConfig[5];
 
-	WriteStatus = I2CWriteBlockWithCRC(BQMAXIMO, PROTECT1, &(Registers.Protect1.Protect1Byte), 5);
+	//ConfigStatus = I2CWriteBlock(BQMAXIMO, PROTECT1, &(Registers.Protect1.Protect1Byte), 5);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT1, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect1.Protect1Byte), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT2, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect2.Protect2Byte), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT3, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect3.Protect3Byte), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, OV_TRIP, I2C_MEMADD_SIZE_8BIT, &(Registers.OVTrip), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, UV_TRIP, I2C_MEMADD_SIZE_8BIT, &(Registers.UVTrip), 1, HAL_MAX_DELAY);
 
-	WriteStatus = I2CReadBlockWithCRC(BQMAXIMO, PROTECT1, bqMaximoProtectionConfig, 5);
+	//ConfigStatus = I2CReadBlock(BQMAXIMO, PROTECT1, bqMaximoProtectionConfig, 5);
+	ConfigStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, PROTECT1, I2C_MEMADD_SIZE_8BIT, bqMaximoProtectionConfig, 5, HAL_MAX_DELAY);
 
 	if(bqMaximoProtectionConfig[0] != Registers.Protect1.Protect1Byte
 			|| bqMaximoProtectionConfig[1] != Registers.Protect2.Protect2Byte
@@ -372,10 +110,10 @@ HAL_StatusTypeDef ConfigureBqMaximo()
 			|| bqMaximoProtectionConfig[3] != Registers.OVTrip
 			|| bqMaximoProtectionConfig[4] != Registers.UVTrip)
 	{
-		WriteStatus = HAL_ERROR;
+		ConfigStatus = HAL_ERROR;
 	}
 
-	return WriteStatus;
+	return ConfigStatus;
 }
 
 HAL_StatusTypeDef InitialisebqMaximo()
@@ -404,16 +142,13 @@ HAL_StatusTypeDef InitialisebqMaximo()
 
 HAL_StatusTypeDef UpdateVoltageFromBqMaximo()
 {
-    HAL_StatusTypeDef WriteStatus = HAL_OK;
+    HAL_StatusTypeDef ReadStatus = HAL_OK;
 	int i = 0;
 	unsigned char *pRawADCData = NULL;
 	unsigned int iTemp = 0;
 	unsigned long lTemp = 0;
 
-	WriteStatus = I2CReadBlockWithCRC(BQMAXIMO, \
-			VC1_HI_BYTE, \
-			&(Registers.VCell1.VCell1Byte.VC1_HI), \
-			30);
+	ReadStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, VC1_HI_BYTE, 1, &(Registers.VCell1.VCell1Byte.VC1_HI), 30, HAL_MAX_DELAY);
 
 	pRawADCData = &Registers.VCell1.VCell1Byte.VC1_HI;
 	for (i = 0; i < 15; i++)
@@ -425,6 +160,29 @@ HAL_StatusTypeDef UpdateVoltageFromBqMaximo()
 		pRawADCData += 2;
 	}
 
-	return WriteStatus;
+	return ReadStatus;
+}
+
+HAL_StatusTypeDef UpdateTempertureFromBqMaximo()
+{
+    HAL_StatusTypeDef ReadStatus = HAL_OK;
+	int i = 0;
+	unsigned char *pRawADCData = NULL;
+	unsigned int iTemp = 0;
+	unsigned long lTemp = 0;
+
+	ReadStatus = HAL_I2C_Mem_Read(&hi2c2, BQ76940_ADDR, TS1_HI_ADDR, 1, &(Registers.TS1.TS1Byte), 6, HAL_MAX_DELAY);
+
+	pRawADCData = &Registers.TS1.TS1Byte.TS1_HI;
+	for (i = 0; i < 3; i++)
+	{
+		iTemp = (unsigned int)(*pRawADCData << 8) + *(pRawADCData + 1);
+		lTemp = ((unsigned long)iTemp * iGain)/1000;
+		lTemp += Registers.ADCOffset;
+		CellVoltage[i] = lTemp;
+		pRawADCData += 2;
+	}
+
+	return ReadStatus;
 }
 
