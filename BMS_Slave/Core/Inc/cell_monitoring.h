@@ -40,9 +40,6 @@ HAL_StatusTypeDef UpdateTempertureFromBqMaximo();
 
 
 // IMPORTED CODE FROM TE
-
-
-
 #define BQMAXIMO (0x08 << 1)
 
 #define LOWBYTE(Data) (unsigned char)(0x00ff & Data)

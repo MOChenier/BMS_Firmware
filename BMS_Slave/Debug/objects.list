@@ -1,5 +1,6 @@
 "./Core/Src/app_freertos.o"
 "./Core/Src/balancing.o"
+"./Core/Src/can_bus.o"
 "./Core/Src/cell_monitoring.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32g0xx_hal_msp.o"
