@@ -10,9 +10,12 @@
 
 //#include "can_bus.h"
 #include "stm32g0xx_hal.h"
+#include "cmsis_os.h"
+#include "main.h"
 
 // Comm with BQ chip
 extern I2C_HandleTypeDef hi2c2;
+
 
 // BQ address on I2C
 #define BQ76940_ADDR  (0x08 << 1)  // 7-bit address shifted for HAL (e.g., 0x08 -> 0x10)
@@ -36,6 +39,19 @@ HAL_StatusTypeDef ConfigureBqMaximo();
 HAL_StatusTypeDef InitialisebqMaximo();
 HAL_StatusTypeDef UpdateVoltageFromBqMaximo();
 HAL_StatusTypeDef UpdateTempertureFromBqMaximo();
+
+
+typedef struct {
+	uint16_t Temp1;
+    uint16_t Temp2;
+    uint16_t Temp3;
+} Temps_t;
+
+extern Temps_t CAN_Temps;
+
+uint16_t ConvertTempToUint16(uint8_t msb, uint8_t lsb);
+void build_can_temps();
+
 
 
 
@@ -128,6 +144,7 @@ HAL_StatusTypeDef UpdateTempertureFromBqMaximo();
 
 #define LOW_BYTE(Data)			(unsigned char)(0xff & Data)
 #define HIGH_BYTE(Data)			(unsigned char)(0xff & (Data >> 8))
+
 
 typedef struct _Register_Group
 {
@@ -482,5 +499,7 @@ typedef struct _Register_Group
 
 }RegisterGroup;
 
+
+extern RegisterGroup Registers;
 
 #endif /* CELL_MONIT_H_ */

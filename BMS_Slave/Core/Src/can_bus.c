@@ -15,11 +15,83 @@ uint8_t RxData[8];
 
 uint8_t RxDatacheck = 0; // Flag that indicates that a message has been received
 
+
+osMessageQueueId_t canRxQueueHandle;
+
+void can_send_Task(){
+
+	FDCAN_setup_std_header();
+
+	for(;;){
+
+		//if (osSemaphoreAcquire(reg_pullHandle, osWaitForever) == osOK){
+
+			FDCAN_set_header(TempertureCanID, 6);
+
+    		HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, TempertureCanID, &CAN_Temps);
+
+    		//osSemaphoreRelease(reg_pullHandle);
+
+			// Yellow LED
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
+			vTaskDelay(1000);
+    	//}
+
+
+	}
+
+}
+
+void can_rcv(){
+
+	canRxQueueHandle = osMessageQueueNew(8, sizeof(CANMessage_t), NULL);
+
+	//for (;;)
+	//{
+
+        CANMessage_t msg;
+        HAL_FDCAN_GetRxMessage(&hfdcan2, FDCAN_RX_FIFO0, &msg.header, msg.data);
+
+		if (osMessageQueueGet(canRxQueueHandle, &msg, NULL, osWaitForever) == osOK)
+		{
+			// Process the received CAN message
+		}
+		// Red LED
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
+		vTaskDelay(100);
+	//}
+
+}
+
+
+HAL_StatusTypeDef SendRegisterGroupFDCAN(RegisterGroup* regData)
+{
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[64] = {0};
+/*
+    // Fill out FDCAN TX header
+    txHeader.Identifier          = 0x321;                   // Change as needed
+    txHeader.IdType              = FDCAN_STANDARD_ID;
+    txHeader.TxFrameType         = FDCAN_DATA_FRAME;
+    txHeader.DataLength          = FDCAN_DLC_BYTES_64;      // DLC = 64 bytes
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch       = FDCAN_BRS_ON;
+    txHeader.FDFormat            = FDCAN_FD_CAN;
+    txHeader.TxEventFifoControl  = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker       = 0;
+*/
+    // Copy struct to buffer (only 55 bytes used)
+    memcpy(txData, regData, sizeof(RegisterGroup));
+
+    // Add message to Tx FIFO
+    return HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader, txData);
+}
+
 int FDCAN1_send_mess(FDCAN_HandleTypeDef *hfdcan, uint8_t *TxData)
 {
 	if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &TxHeader, TxData) != HAL_OK)
 	{
-		FDCAN_Error_Handler();
+		//FDCAN_Error_Handler();
 	}
 	return 0;
 }
@@ -41,12 +113,10 @@ slave_return_t convert_to_struct(uint8_t RxData[8])
 	return return_message;
 }
 
-void FDCAN_set_std_header(uint16_t std_tx_id, uint8_t dlc)
+void FDCAN_setup_std_header()
 {
-	TxHeader.Identifier = std_tx_id;
 	TxHeader.IdType = FDCAN_STANDARD_ID;
 	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_2;
 	TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
 	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
 	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
@@ -54,89 +124,45 @@ void FDCAN_set_std_header(uint16_t std_tx_id, uint8_t dlc)
 	TxHeader.MessageMarker = 0;
 }
 
-void FDCAN_set_ext_header(uint32_t ext_tx_id, uint8_t dlc)
+void FDCAN_set_header(uint16_t std_tx_id, uint8_t dlc)
 {
-	TxHeader.Identifier = ext_tx_id;
-	TxHeader.IdType = FDCAN_EXTENDED_ID;
-	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_2;
-	TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
-	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
-	TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-	TxHeader.MessageMarker = 0;
-}
-
-void FDCAN_Error_Handler(void)
-{
-	__disable_irq();
-	while (1)
-	{
-	}
-}
-
-void FDCAN_Filter_Config(FDCAN_HandleTypeDef *hfdcan)
-{
-	FDCAN_FilterTypeDef sFilterConfig;
-
-	sFilterConfig.IdType = FDCAN_STANDARD_ID;
-	sFilterConfig.FilterIndex = 0;
-	sFilterConfig.FilterType = FDCAN_FILTER_MASK;
-	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-	sFilterConfig.FilterID1 = 0x000;
-	sFilterConfig.FilterID2 = 0x000;
-
-	if (HAL_FDCAN_ConfigFilter(hfdcan, &sFilterConfig) != HAL_OK)
-	{
-		FDCAN_Error_Handler();
-	}
-}
-
-void FDCAN_Activate_Interrupts(FDCAN_HandleTypeDef *hfdcan)
-{
-	HAL_FDCAN_ActivateNotification(hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
-
-	if (HAL_FDCAN_Start(hfdcan) != HAL_OK)
-	{
-		FDCAN_Error_Handler();
-	}
+	TxHeader.Identifier = std_tx_id;
+	TxHeader.DataLength = FDCAN_DLC_BYTES_6;
 }
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
-	if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
-	{
-		if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
-		{
-			FDCAN_Error_Handler();
-		}
-		RxDatacheck = 1;
-	}
+    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != 0)
+    {
+        CANMessage_t msg;
+        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &msg.header, msg.data) == HAL_OK)
+        {
+            osMessageQueuePut(canRxQueueHandle, &msg, 0, 0);
+        }
+    }
 }
 
-void MX_FDCAN1_Init_Loopback(FDCAN_HandleTypeDef *hfdcan)
+void CAN_Filter_Config(FDCAN_HandleTypeDef *hfdcan)
 {
-	hfdcan->Instance = FDCAN1;
-	hfdcan->Init.ClockDivider = FDCAN_CLOCK_DIV1;
-	hfdcan->Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-	hfdcan->Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
-	hfdcan->Init.AutoRetransmission = DISABLE;
-	hfdcan->Init.TransmitPause = DISABLE;
-	hfdcan->Init.ProtocolException = DISABLE;
-	hfdcan->Init.NominalPrescaler = 16;
-	hfdcan->Init.NominalSyncJumpWidth = 1;
-	hfdcan->Init.NominalTimeSeg1 = 13;
-	hfdcan->Init.NominalTimeSeg2 = 2;
-	hfdcan->Init.DataPrescaler = 1;
-	hfdcan->Init.DataSyncJumpWidth = 1;
-	hfdcan->Init.DataTimeSeg1 = 1;
-	hfdcan->Init.DataTimeSeg2 = 1;
-	hfdcan->Init.StdFiltersNbr = 1;
-	hfdcan->Init.ExtFiltersNbr = 0;
-	hfdcan->Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+    CAN_FilterTypeDef sFilterConfig;
 
-	if (HAL_FDCAN_Init(hfdcan) != HAL_OK)
-	{
-		FDCAN_Error_Handler();
-	}
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = TempertureCanID;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+
+    if (HAL_CAN_ConfigFilter(hcan, &sFilterConfig) != HAL_OK)
+    {
+        CAN_Error_Handler();
+    }
 }
+
+
+
+
+

@@ -8,12 +8,13 @@
 
 #include "cell_monitoring.h"
 
-uint16_t cell_voltages[NB_CELLS];
-uint16_t pack_temps[NB_TEMP_SENS];
+//extern osSemaphoreId_t registers_pull;
 
 // IMPROTED
 
 RegisterGroup Registers;
+
+Temps_t CAN_Temps;
 
 const unsigned int OVPThreshold = 4300;
 const unsigned int UVPThreshold = 2500;
@@ -49,17 +50,24 @@ void Cell_Motoring_Task(){
 	    if (HAL_I2C_IsDeviceReady(&hi2c2, BQ76940_ADDR, 3, 1000) == HAL_OK)
 	    {
 
-	    	import_status |= UpdateVoltageFromBqMaximo();
-	    	//import_status |= UpdateTempertureFromBqMaximo();
-			// Red LED
-			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
-			vTaskDelay(1000);
+	    	//if (osSemaphoreAcquire(reg_pullHandle, osWaitForever) == 0){
+
+				import_status |= UpdateVoltageFromBqMaximo();
+				build_can_temps();
+
+	    	    //osSemaphoreRelease(reg_memHandle);
+
+		    	//import_status |= UpdateTempertureFromBqMaximo();
+				// Red LED
+				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
+				vTaskDelay(1000);
+	    	//}
 
 	    }
 		else
 		{
 			// Yellow LED
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
+			//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
 			vTaskDelay(1000);
 	    }
 
@@ -67,7 +75,9 @@ void Cell_Motoring_Task(){
 	}
 }
 
+void Ass_CanTempByte(){
 
+}
 
 
 HAL_StatusTypeDef GetADCGainOffset()
@@ -177,4 +187,27 @@ HAL_StatusTypeDef UpdateTempertureFromBqMaximo()
 
 	return ReadStatus;
 }
+
+// ChatGPT is my homie
+uint16_t ConvertTempToUint16(uint8_t msb, uint8_t lsb) {
+    uint16_t adc_code = ((uint16_t)msb << 8) | lsb;
+    float voltage = (adc_code / 32768.0f) * 1.8f;
+    float temp_celsius = (voltage - 0.5f) / 0.01f;
+
+    // Optional: clip range to safe max
+    if (temp_celsius < 0) temp_celsius = 0;
+    if (temp_celsius > 6553.5f) temp_celsius = 6553.5f;
+
+    // Multiply by 10 to store 0.1°C resolution
+    return (uint16_t)(temp_celsius * 10.0f + 0.5f);  // rounded
+}
+
+void build_can_temps(){
+
+	CAN_Temps.Temp1 = ConvertTempToUint16(Registers.TS1.TS1Byte.TS1_HI , Registers.TS1.TS1Byte.TS1_LO);
+	CAN_Temps.Temp2 = ConvertTempToUint16(Registers.TS2.TS2Byte.TS2_HI , Registers.TS2.TS2Byte.TS2_LO);
+	CAN_Temps.Temp3 = ConvertTempToUint16(Registers.TS3.TS3Byte.TS3_HI , Registers.TS3.TS3Byte.TS3_LO);
+
+}
+
 

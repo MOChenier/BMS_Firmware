@@ -33,7 +33,19 @@ Core/Src/balancing.o: ../Core/Src/balancing.c ../Core/Inc/balancing.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_i2c_ex.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h \
- ../Core/Inc/cell_monitoring.h ../Core/Inc/cell_monitoring.h
+ ../Core/Inc/cell_monitoring.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
+ ../Core/Inc/FreeRTOSConfig.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/portmacro.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ ../Core/Inc/main.h ../Core/Inc/cell_monitoring.h
 ../Core/Inc/balancing.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -70,4 +82,16 @@ Core/Src/balancing.o: ../Core/Src/balancing.c ../Core/Inc/balancing.h \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_pwr_ex.h:
 ../Core/Inc/cell_monitoring.h:
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
+../Core/Inc/FreeRTOSConfig.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h:
+../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/portmacro.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
+../Core/Inc/main.h:
 ../Core/Inc/cell_monitoring.h:

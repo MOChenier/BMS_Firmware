@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "cell_monitoring.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,6 +63,23 @@ const osThreadAttr_t BatteryManager_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
   .stack_size = 128 * 4
 };
+/* Definitions for CAN_Send */
+osThreadId_t CAN_SendHandle;
+const osThreadAttr_t CAN_Send_attributes = {
+  .name = "CAN_Send",
+  .priority = (osPriority_t) osPriorityAboveNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for reg_pull */
+osSemaphoreId_t reg_pullHandle;
+const osSemaphoreAttr_t reg_pull_attributes = {
+  .name = "reg_pull"
+};
+/* Definitions for can_push */
+osSemaphoreId_t can_pushHandle;
+const osSemaphoreAttr_t can_push_attributes = {
+  .name = "can_push"
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -75,6 +93,7 @@ static void MX_I2C3_Init(void);
 static void MX_I2C2_Init(void);
 void StartDefaultTask(void *argument);
 extern void Cell_Motoring_Task(void *argument);
+extern void can_send_Task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -129,6 +148,13 @@ int main(void)
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* creation of reg_pull */
+  reg_pullHandle = osSemaphoreNew(1, 1, &reg_pull_attributes);
+
+  /* creation of can_push */
+  can_pushHandle = osSemaphoreNew(1, 0, &can_push_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -147,6 +173,9 @@ int main(void)
 
   /* creation of BatteryManager */
   BatteryManagerHandle = osThreadNew(Cell_Motoring_Task, NULL, &BatteryManager_attributes);
+
+  /* creation of CAN_Send */
+  CAN_SendHandle = osThreadNew(can_send_Task, NULL, &CAN_Send_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -290,7 +319,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Instance = FDCAN2;
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
   hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-  hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
+  hfdcan2.Init.Mode = FDCAN_MODE_EXTERNAL_LOOPBACK;
   hfdcan2.Init.AutoRetransmission = DISABLE;
   hfdcan2.Init.TransmitPause = DISABLE;
   hfdcan2.Init.ProtocolException = DISABLE;
@@ -310,7 +339,7 @@ static void MX_FDCAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
-
+  HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
   /* USER CODE END FDCAN2_Init 2 */
 
 }
