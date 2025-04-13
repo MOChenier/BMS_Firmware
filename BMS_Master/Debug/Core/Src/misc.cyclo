@@ -1,0 +1,5 @@
+../Core/Src/misc.c:15:7:get_output_current	1
+../Core/Src/misc.c:21:6:deactivate_main_contactor	1
+../Core/Src/misc.c:32:6:activate_main_contactor	2
+../Core/Src/misc.c:48:6:deactivate_precharge_contactor	2
+../Core/Src/misc.c:60:6:activate_precharge_contactor	1

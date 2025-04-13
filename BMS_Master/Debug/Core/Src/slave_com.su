@@ -1,0 +1,13 @@
+../Core/Src/slave_com.c:8:5:store_received_info	32	static
+../Core/Src/slave_com.c:42:6:ask_for_voltages	16	static
+../Core/Src/slave_com.c:55:6:auto_ask_for_voltages	24	static
+../Core/Src/slave_com.c:69:6:stop_auto_ask_for_voltages	16	static
+../Core/Src/slave_com.c:82:6:ask_for_temperatures	16	static
+../Core/Src/slave_com.c:95:6:auto_ask_for_temperatures	24	static
+../Core/Src/slave_com.c:109:6:stop_auto_ask_for_temperatures	16	static
+../Core/Src/slave_com.c:122:6:ask_for_balancing_info	16	static
+../Core/Src/slave_com.c:135:6:auto_ask_for_balancing_info	24	static
+../Core/Src/slave_com.c:149:6:stop_auto_ask_for_balancing_info	16	static
+../Core/Src/slave_com.c:162:6:start_balancing	16	static
+../Core/Src/slave_com.c:175:6:stop_balancing	16	static
+../Core/Src/slave_com.c:188:6:get_ready_for_charging	16	static

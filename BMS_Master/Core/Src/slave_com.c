@@ -1,6 +1,43 @@
-#include "to_slave.h"
+#include <slave_com.h>
 
 extern CAN_HandleTypeDef hcan2;
+extern uint8_t last_voltage_info[8];
+extern uint8_t last_temp_info[8];
+extern uint8_t last_balanc_info[8];
+
+int store_received_info(CAN_RxHeaderTypeDef* RxHeader, uint8_t RxData[8]){
+
+	if(RxHeader->StdId == RET_VOLTAGE_INFO_STDID){
+
+		for(int i = 0; i < 8; i++){
+
+			last_voltage_info[i] = RxData[i];
+
+		}
+		return 1;
+	}else if(RxHeader->StdId == RET_TEMP_INFO_STDID){
+
+		for(int i = 0; i < 8; i++){
+
+			last_temp_info[i] = RxData[i];
+
+		}
+		return 2;
+
+	}else if(RxHeader->StdId == RET_BALANC_INFO_STDID){
+
+		for(int i = 0; i < 8; i++){
+
+			last_balanc_info[i] = RxData[i];
+
+		}
+		return 3;
+	}
+
+
+	return 0;
+}
+
 
 void ask_for_voltages()
 {
@@ -159,4 +196,6 @@ void get_ready_for_charging()
 	CAN1_send_mess(&hcan2, message);
 
 }
+
+
 

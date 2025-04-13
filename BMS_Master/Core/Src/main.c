@@ -51,21 +51,16 @@ CAN_HandleTypeDef hcan2;
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c3;
 
-SD_HandleTypeDef hsd;
-
-SPI_HandleTypeDef hspi3;
-
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 IRDA_HandleTypeDef hirda1;
 IRDA_HandleTypeDef hirda6;
 
-HCD_HandleTypeDef hhcd_USB_OTG_FS;
-
 /* USER CODE BEGIN PV */
-extern uint8_t RxData[8];
-extern CAN_RxHeaderTypeDef   RxHeader;
+return_mess_t last_voltage_info = { {0}, 0, 0};
+return_mess_t last_temp_info = { {0}, 0, 0};
+return_mess_t last_balanc_info = { {0}, 0, 0};
 
 uint8_t master_mode = 0; // 0: Standby, 1: Charge/Balancing 2: In Operation
 
@@ -82,10 +77,7 @@ static void MX_GPIO_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C3_Init(void);
-static void MX_SDIO_SD_Init(void);
-static void MX_SPI3_Init(void);
 static void MX_USART6_IRDA_Init(void);
-static void MX_USB_OTG_FS_HCD_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_IRDA_Init(void);
 static void MX_TIM2_Init(void);
@@ -131,41 +123,94 @@ int main(void)
   MX_CAN2_Init();
   MX_I2C1_Init();
   MX_I2C3_Init();
-  MX_SDIO_SD_Init();
-  MX_SPI3_Init();
   MX_USART6_IRDA_Init();
-  MX_USB_OTG_FS_HCD_Init();
   MX_ADC1_Init();
   MX_USART1_IRDA_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  ITM_Init(); // Init ITM to send data through ITM port 0
+//  ITM_Init(); // Init ITM to send data through ITM port 0
+//  HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+  uint32_t can_err = 0;
+  CAN_FilterTypeDef filter;
+  filter.FilterActivation = ENABLE;
+  filter.FilterBank = 0;
+  filter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  filter.FilterIdHigh = 0x0000;
+  filter.FilterIdLow = 0x0000;
+  filter.FilterMaskIdHigh = 0x0000;
+  filter.FilterMaskIdLow = 0x0000;
+  filter.FilterMode = CAN_FILTERMODE_IDMASK;
+  filter.FilterScale = CAN_FILTERSCALE_32BIT;
+  if (HAL_CAN_ConfigFilter(&hcan2, &filter) != HAL_OK)
+  {
+      CAN_Error_Handler();
+  }
 
+  HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+
+//  CAN_Activate_Interrupts(&hcan2);
   HAL_TIM_Base_Start_IT(&htim2); //Start Main timer (10 ms)
+  uint8_t TxData[1] = {1};
 
+  HAL_CAN_Start(&hcan2);
+  can_err = HAL_CAN_GetError(&hcan2);
+
+//  CAN_init_header();
+  CAN_TxHeaderTypeDef	TxHeader;
+  uint32_t	TxMailbox;
+
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.StdId = TxID;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.DLC = 1;
+
+	uint8_t RxData[1] = {0};
+	CAN_RxHeaderTypeDef RxHeader;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+//	ITM_SendChar('H');
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if((all_connection_states & CHARGER_CONN_MASK) != 0){
+//	  printf("main loop");
 
-		  charging_balancing_mode();
+	  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox) != HAL_OK)
+	  {
+	     CAN_Error_Handler ();
+	  }
+	  can_err = HAL_CAN_GetError(&hcan2);
 
 
-	  }else if((all_connection_states & IGNITION_MASK) != 0){
+	  while(HAL_CAN_GetRxFifoFillLevel(&hcan2, CAN_RX_FIFO0) < 1) {
+//	      HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader, RxData);
+		  can_err = HAL_CAN_GetError(&hcan2);
 
-
-
+		  printf("caca");
+	      // process RxData
 	  }
 
+	  HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &RxHeader, RxData);
 
-	  master_mode = 0;
+	  TxData[0]++;
+//	  if((all_connection_states & CHARGER_CONN_MASK) != 0){
+//
+////		  charging_balancing_mode();
+//
+//
+//	  }else if((all_connection_states & IGNITION_MASK) != 0){
+//
+//
+//
+//	  }
+
+
+//	  master_mode = 0;
 	  HAL_Delay(MAIN_LOOP_DELAY_MS);
 
   }
@@ -189,17 +234,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 15;
-  RCC_OscInitStruct.PLL.PLLN = 144;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 5;
-  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -289,7 +327,7 @@ static void MX_CAN2_Init(void)
   /* USER CODE END CAN2_Init 1 */
   hcan2.Instance = CAN2;
   hcan2.Init.Prescaler = 16;
-  hcan2.Init.Mode = CAN_MODE_NORMAL;
+  hcan2.Init.Mode = CAN_MODE_LOOPBACK;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_1TQ;
   hcan2.Init.TimeSeg2 = CAN_BS2_1TQ;
@@ -374,80 +412,6 @@ static void MX_I2C3_Init(void)
   /* USER CODE BEGIN I2C3_Init 2 */
 
   /* USER CODE END I2C3_Init 2 */
-
-}
-
-/**
-  * @brief SDIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SDIO_SD_Init(void)
-{
-
-  /* USER CODE BEGIN SDIO_Init 0 */
-
-  /* USER CODE END SDIO_Init 0 */
-
-  /* USER CODE BEGIN SDIO_Init 1 */
-
-  /* USER CODE END SDIO_Init 1 */
-  hsd.Instance = SDIO;
-  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
-  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
-  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-  hsd.Init.BusWide = SDIO_BUS_WIDE_4B;
-  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 0;
-  if (HAL_SD_Init(&hsd) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SDIO_Init 2 */
-
-  /* USER CODE END SDIO_Init 2 */
-
-}
-
-/**
-  * @brief SPI3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI3_Init(void)
-{
-
-  /* USER CODE BEGIN SPI3_Init 0 */
-
-  /* USER CODE END SPI3_Init 0 */
-
-  /* USER CODE BEGIN SPI3_Init 1 */
-
-  /* USER CODE END SPI3_Init 1 */
-  /* SPI3 parameter configuration*/
-  hspi3.Instance = SPI3;
-  hspi3.Init.Mode = SPI_MODE_MASTER;
-  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi3.Init.NSS = SPI_NSS_SOFT;
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi3.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI3_Init 2 */
-
-  /* USER CODE END SPI3_Init 2 */
 
 }
 
@@ -606,37 +570,6 @@ static void MX_USART6_IRDA_Init(void)
 }
 
 /**
-  * @brief USB_OTG_FS Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USB_OTG_FS_HCD_Init(void)
-{
-
-  /* USER CODE BEGIN USB_OTG_FS_Init 0 */
-
-  /* USER CODE END USB_OTG_FS_Init 0 */
-
-  /* USER CODE BEGIN USB_OTG_FS_Init 1 */
-
-  /* USER CODE END USB_OTG_FS_Init 1 */
-  hhcd_USB_OTG_FS.Instance = USB_OTG_FS;
-  hhcd_USB_OTG_FS.Init.Host_channels = 8;
-  hhcd_USB_OTG_FS.Init.speed = HCD_SPEED_FULL;
-  hhcd_USB_OTG_FS.Init.dma_enable = DISABLE;
-  hhcd_USB_OTG_FS.Init.phy_itface = HCD_PHY_EMBEDDED;
-  hhcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
-  if (HAL_HCD_Init(&hhcd_USB_OTG_FS) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USB_OTG_FS_Init 2 */
-
-  /* USER CODE END USB_OTG_FS_Init 2 */
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -649,7 +582,6 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -713,6 +645,32 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC8 PC9 PC10 PC11
+                           PC12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
+                          |GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA11 PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF10_OTG_FS;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PD2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);

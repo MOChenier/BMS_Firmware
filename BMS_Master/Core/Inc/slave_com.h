@@ -5,11 +5,12 @@
  *      Author: marco
  */
 
-#ifndef INC_TO_SLAVE_H_
-#define INC_TO_SLAVE_H_
+#ifndef INC_SLAVE_COM_H_
+#define INC_SLAVE_COM_H_
 
 #include "can_bus.h"
 
+// Messages to send to slave
 #define VOLTAGE_INFO 0xA1
 #define AUTO_VOLTAGE_INFO 0xAA
 #define STOP_VOLTAGE_INFO 0xA0
@@ -26,9 +27,16 @@
 
 #define READY_TO_CHARGE		0xCC
 
+// Slave return IDs. Should be returned in the slave's message's Std_ID
+#define RET_VOLTAGE_INFO_STDID 0xAA
+#define RET_TEMP_INFO_STDID 0x66
+#define RET_BALANC_INFO_STDID 0xBB
+
 // Info for slave CAN communication
 #define SLAVE_BYTES_NUM 2
 #define SLAVE_HEADER 0x111
+
+int store_received_info(CAN_RxHeaderTypeDef* RxHeader, uint8_t RxData[8]);
 
 void ask_for_voltages();
 void auto_ask_for_voltages(uint8_t delay_10_ms);
@@ -45,4 +53,4 @@ void start_balancing();
 void stop_balancing();
 
 
-#endif /* INC_TO_SLAVE_H_ */
+#endif /* INC_SLAVE_COM_H_ */

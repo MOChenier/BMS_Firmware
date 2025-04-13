@@ -37,6 +37,12 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+typedef struct{
+	uint8_t RxData[8];
+	uint32_t last_mess_timestamp;
+	uint32_t delay_with_prev_mess;
+}return_mess_t;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -113,7 +119,7 @@ void Error_Handler(void);
 #define SLOW_BLINKING_HV_10MS_PERIODS 50
 #define FAST_BLINKING_HV_10MS_PERIODS 10
 
-#define MAIN_LOOP_DELAY_MS 20
+#define MAIN_LOOP_DELAY_MS 100
 
 #define TIMER_MAX 1000
 

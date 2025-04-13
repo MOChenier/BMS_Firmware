@@ -19,12 +19,13 @@
 #define TxID (0x111)
 #define TxDLC 2
 
-void CAN_init();
+void CAN_init_header();
 void CAN_set_std_header(uint16_t std_tx_id, uint8_t dlc);
 void CAN_set_ext_header(uint32_t ext_tx_id, uint8_t dlc);
 
 int CAN1_send_mess(CAN_HandleTypeDef *hcan, uint8_t *TxData);
 void CAN_Error_Handler(void);
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void CAN_Filter_Config(CAN_HandleTypeDef *hcan);
 void CAN_Activate_Interrupts(CAN_HandleTypeDef *hcan);

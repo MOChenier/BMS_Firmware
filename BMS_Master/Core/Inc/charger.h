@@ -8,7 +8,7 @@
 #ifndef INC_CHARGER_H_
 #define INC_CHARGER_H_
 
-#include "to_slave.h"
+#include <slave_com.h>
 #include "can_bus.h"
 #include "stm32f4xx_hal.h"
 

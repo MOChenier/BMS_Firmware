@@ -1,1 +1,9 @@
-../Core/Src/charger.c:14:6:charging_balancing_mode	9
+../Core/Src/charger.c:19:6:charging_balancing_mode	9
+../Core/Src/charger.c:88:6:start_charging_mode	1
+../Core/Src/charger.c:95:6:stop_charging_mode	1
+../Core/Src/charger.c:102:6:start_balancing_mode	1
+../Core/Src/charger.c:109:6:stop_balancing_mode	1
+../Core/Src/charger.c:119:6:start_charging	1
+../Core/Src/charger.c:147:6:stop_charging	1
+../Core/Src/charger.c:175:5:all_cells_under_threshold	1
+../Core/Src/charger.c:181:6:check_total_battery_state	1

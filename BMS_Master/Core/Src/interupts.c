@@ -8,10 +8,10 @@
 #include "can_bus.h"
 #include "misc.h"
 #include "stm32f4xx_hal.h"
-
+#include "slave_com.h"
 
 extern uint8_t RxData[8];
-extern CAN_RxHeaderTypeDef   RxHeader;
+extern CAN_RxHeaderTypeDef RxHeader;
 
 extern uint8_t master_mode; // 0: Standby, 1: Charge/Balancing 2: In Operation
 
@@ -23,8 +23,6 @@ extern volatile uint8_t blinking_HV_led; //0: No blinking, 1: Slow blinking, 2: 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 
-
-
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 //	slave_return_t return_message;
@@ -34,6 +32,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 //    	Start timer and turn ON Yellow LED
     	HAL_TIM_Base_Start_IT(&htim3);
         HAL_GPIO_WritePin(YELLOW_LED_GPIO_Port, YELLOW_LED_Pin, GPIO_PIN_SET); // Turn ON LED
+
+//      Parse and store message according to type
+//      If the header is of standard length (like for slave reception message)
+        if(RxHeader.IDE == 0){
+        	store_received_info(&RxHeader, RxData);
+        }
 
         // Print or process the received message
         printf("Received CAN Message: ");
@@ -61,6 +65,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     	if((timer_count % HB_10MS_PERIODS) == 0){
     		HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin); // Toggle LED
+    		printf("Hilo");
     	}
 
     	if((timer_count % CHARGER_CONNECTION_10MS_PERIODS) == 0){
