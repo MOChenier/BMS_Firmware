@@ -57,7 +57,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern FDCAN_HandleTypeDef hfdcan2;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -123,20 +123,6 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32g0xx.s).                    */
 /******************************************************************************/
-
-/**
-  * @brief This function handles TIM16, FDCAN1_IT0 and FDCAN2_IT0 Interrupt.
-  */
-void TIM16_FDCAN_IT0_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM16_FDCAN_IT0_IRQn 0 */
-
-  /* USER CODE END TIM16_FDCAN_IT0_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan2);
-  /* USER CODE BEGIN TIM16_FDCAN_IT0_IRQn 1 */
-
-  /* USER CODE END TIM16_FDCAN_IT0_IRQn 1 */
-}
 
 /* USER CODE BEGIN 1 */
 

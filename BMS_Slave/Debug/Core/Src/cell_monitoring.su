@@ -1,7 +1,7 @@
 ../Core/Src/cell_monitoring.c:32:6:Cell_Motoring_Task	16	static
 ../Core/Src/cell_monitoring.c:78:6:Ass_CanTempByte	8	static
-../Core/Src/cell_monitoring.c:83:19:GetADCGainOffset	32	static
-../Core/Src/cell_monitoring.c:94:19:ConfigureBqMaximo	32	static
+../Core/Src/cell_monitoring.c:83:19:GetADCGainOffset	40	static
+../Core/Src/cell_monitoring.c:94:19:ConfigureBqMaximo	40	static
 ../Core/Src/cell_monitoring.c:121:19:InitialisebqMaximo	16	static
 ../Core/Src/cell_monitoring.c:145:19:UpdateVoltageFromBqMaximo	56	static
 ../Core/Src/cell_monitoring.c:168:19:UpdateTempertureFromBqMaximo	56	static

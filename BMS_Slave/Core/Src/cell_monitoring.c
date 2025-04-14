@@ -32,11 +32,11 @@ int iGain = 0;
 void Cell_Motoring_Task(){
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
-	vTaskDelay(2000);
+	vTaskDelay(1000);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
-	vTaskDelay(2000);
+	vTaskDelay(1000);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
-	vTaskDelay(2000);
+	vTaskDelay(1000);
 
 	HAL_StatusTypeDef init_status = HAL_OK;
 	HAL_StatusTypeDef import_status = HAL_OK;
@@ -57,7 +57,7 @@ void Cell_Motoring_Task(){
 
 	    	    //osSemaphoreRelease(reg_memHandle);
 
-		    	//import_status |= UpdateTempertureFromBqMaximo();
+		    	import_status |= UpdateTempertureFromBqMaximo();
 				// Red LED
 				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
 				vTaskDelay(1000);
@@ -67,7 +67,7 @@ void Cell_Motoring_Task(){
 		else
 		{
 			// Yellow LED
-			//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
 			vTaskDelay(1000);
 	    }
 
@@ -84,9 +84,9 @@ HAL_StatusTypeDef GetADCGainOffset()
 {
     HAL_StatusTypeDef WriteStatus = HAL_OK;
 
-    WriteStatus |= HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
-    WriteStatus |= HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN2, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain2.ADCGain2Byte), 1, HAL_MAX_DELAY);
-    WriteStatus |= HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCOFFSET, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCOffset), 1, HAL_MAX_DELAY);
+    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN1, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain1.ADCGain1Byte), 1, HAL_MAX_DELAY);
+    WriteStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCGAIN2, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCGain2.ADCGain2Byte), 1, HAL_MAX_DELAY);
+    WriteStatus|= HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, ADCOFFSET, I2C_MEMADD_SIZE_8BIT, &(Registers.ADCOffset), 1, HAL_MAX_DELAY);
 
 	return WriteStatus;
 }
@@ -97,14 +97,14 @@ HAL_StatusTypeDef ConfigureBqMaximo()
 	unsigned char bqMaximoProtectionConfig[5];
 
 	//ConfigStatus = I2CWriteBlock(BQMAXIMO, PROTECT1, &(Registers.Protect1.Protect1Byte), 5);
-	ConfigStatus |= HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT1, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect1.Protect1Byte), 1, HAL_MAX_DELAY);
-	ConfigStatus |= HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT2, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect2.Protect2Byte), 1, HAL_MAX_DELAY);
-	ConfigStatus |= HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT3, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect3.Protect3Byte), 1, HAL_MAX_DELAY);
-	ConfigStatus |= HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, OV_TRIP, I2C_MEMADD_SIZE_8BIT, &(Registers.OVTrip), 1, HAL_MAX_DELAY);
-	ConfigStatus |= HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, UV_TRIP, I2C_MEMADD_SIZE_8BIT, &(Registers.UVTrip), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT1, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect1.Protect1Byte), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT2, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect2.Protect2Byte), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, PROTECT3, I2C_MEMADD_SIZE_8BIT, &(Registers.Protect3.Protect3Byte), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, OV_TRIP, I2C_MEMADD_SIZE_8BIT, &(Registers.OVTrip), 1, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Write(&hi2c2, BQ76940_ADDR, UV_TRIP, I2C_MEMADD_SIZE_8BIT, &(Registers.UVTrip), 1, HAL_MAX_DELAY);
 
 	//ConfigStatus = I2CReadBlock(BQMAXIMO, PROTECT1, bqMaximoProtectionConfig, 5);
-	ConfigStatus |= HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, PROTECT1, I2C_MEMADD_SIZE_8BIT, bqMaximoProtectionConfig, 5, HAL_MAX_DELAY);
+	ConfigStatus = HAL_I2C_Mem_Read(&hi2c2, BQMAXIMO, PROTECT1, I2C_MEMADD_SIZE_8BIT, bqMaximoProtectionConfig, 5, HAL_MAX_DELAY);
 
 	if(bqMaximoProtectionConfig[0] != Registers.Protect1.Protect1Byte
 			|| bqMaximoProtectionConfig[1] != Registers.Protect2.Protect2Byte

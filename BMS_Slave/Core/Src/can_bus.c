@@ -28,13 +28,17 @@ void can_send_Task(){
 
 			FDCAN_set_header(TempertureCanID, 6);
 
+			CAN_Temps.Temp1 = 12.0;
+			CAN_Temps.Temp2 = 13.0;
+			CAN_Temps.Temp3 = 14.0;
+
     		HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, TempertureCanID, &CAN_Temps);
 
     		//osSemaphoreRelease(reg_pullHandle);
 
 			// Yellow LED
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
-			vTaskDelay(1000);
+			//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);
+			vTaskDelay(100);
     	//}
 
 
@@ -139,26 +143,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         {
             osMessageQueuePut(canRxQueueHandle, &msg, 0, 0);
         }
-    }
-}
-
-void CAN_Filter_Config(FDCAN_HandleTypeDef *hfdcan)
-{
-    CAN_FilterTypeDef sFilterConfig;
-
-    sFilterConfig.FilterBank = 0;
-    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = 0x0000;
-    sFilterConfig.FilterIdLow = TempertureCanID;
-    sFilterConfig.FilterMaskIdHigh = 0x0000;
-    sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig.FilterActivation = ENABLE;
-
-    if (HAL_CAN_ConfigFilter(hcan, &sFilterConfig) != HAL_OK)
-    {
-        CAN_Error_Handler();
     }
 }
 
