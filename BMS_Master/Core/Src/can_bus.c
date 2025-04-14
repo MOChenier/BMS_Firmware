@@ -96,19 +96,20 @@ void CAN_Error_Handler(void)
 
 void CAN_Filter_Config(CAN_HandleTypeDef *hcan)
 {
-    CAN_FilterTypeDef sFilterConfig;
 
-    sFilterConfig.FilterBank = 0;
-    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = 0x0000;
-    sFilterConfig.FilterIdLow = 0x0000;
-    sFilterConfig.FilterMaskIdHigh = 0x0000;
-    sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig.FilterActivation = ENABLE;
+    CAN_FilterTypeDef filterConfig;
+    filterConfig.FilterBank = 0;
+    filterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    filterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    filterConfig.FilterIdHigh = 0x0000;
+    filterConfig.FilterIdLow = 0x0000;
+    filterConfig.FilterMaskIdHigh = 0x0000;
+    filterConfig.FilterMaskIdLow = 0x0000;
+    filterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    filterConfig.FilterActivation = ENABLE;
+    filterConfig.SlaveStartFilterBank = 14;
 
-    if (HAL_CAN_ConfigFilter(hcan, &sFilterConfig) != HAL_OK)
+    if (HAL_CAN_ConfigFilter(hcan, &filterConfig) != HAL_OK)
     {
         CAN_Error_Handler();
     }
@@ -117,6 +118,8 @@ void CAN_Filter_Config(CAN_HandleTypeDef *hcan)
 void CAN_Activate_Interrupts(CAN_HandleTypeDef *hcan)
 {
     HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+    CAN_Filter_Config(hcan);
 
     if (__HAL_CAN_GET_FLAG(hcan, CAN_FLAG_EPV) ||
         __HAL_CAN_GET_FLAG(hcan, CAN_FLAG_BOF))

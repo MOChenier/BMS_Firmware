@@ -1,0 +1,4 @@
+../Core/Src/interupts.c:28:6:HAL_CAN_RxFifo0MsgPendingCallback	24	static
+../Core/Src/interupts.c:50:6:HAL_CAN_TxMailboxCompleteCallback	16	static
+../Core/Src/interupts.c:57:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/interupts.c:102:6:HAL_GPIO_EXTI_Callback	16	static

@@ -1,0 +1,9 @@
+../Core/Src/can_bus.c:19:5:CAN1_send_mess	2
+../Core/Src/can_bus.c:31:16:convert_to_struct	1
+../Core/Src/can_bus.c:55:6:CAN_init_header	1
+../Core/Src/can_bus.c:66:6:CAN_set_std_header	1
+../Core/Src/can_bus.c:75:6:CAN_set_ext_header	1
+../Core/Src/can_bus.c:86:6:CAN_Error_Handler	1
+../Core/Src/can_bus.c:97:6:CAN_Filter_Config	2
+../Core/Src/can_bus.c:118:6:CAN_Activate_Interrupts	4
+../Core/Src/can_bus.c:143:6:MX_CAN1_Init_Loopback	2
