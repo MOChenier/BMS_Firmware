@@ -19,12 +19,25 @@ uint8_t RxDatacheck = 0; //Flag that indicates that a message has been received
 int CAN1_send_mess(CAN_HandleTypeDef *hcan, uint8_t *TxData)
 {
 
+	while (HAL_CAN_IsTxMessagePending(hcan, TxMailbox));
 	if (HAL_CAN_AddTxMessage(hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
 	{
 	   CAN_Error_Handler ();
 	}
+/*
+	 HAL_Delay(10);
 
+	while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) == 0);
 
+	CAN_RxHeaderTypeDef RxHeader;
+	uint8_t RxData[8];
+
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK)
+	{
+		// ✅ Set breakpoint here and inspect RxData[] in debugger
+	}
+
+*/
 	return 0;
 }
 
@@ -59,7 +72,6 @@ void CAN_init_header()
 	TxHeader.StdId = TxID;
 	TxHeader.RTR = CAN_RTR_DATA;
 	TxHeader.DLC = TxDLC;
-
 
 }
 

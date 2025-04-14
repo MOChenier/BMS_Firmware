@@ -13,6 +13,9 @@ void ask_for_voltages()
 
 	CAN1_send_mess(&hcan2, message);
 
+	uint32_t default_btr = CAN2->BTR;
+
+
 }
 
 void auto_ask_for_voltages(uint8_t delay_10_ms)
