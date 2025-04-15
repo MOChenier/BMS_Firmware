@@ -11,21 +11,22 @@
 #include <slave_com.h>
 #include "can_bus.h"
 #include "stm32f4xx_hal.h"
+#include "misc.h"
 
-
-#define CHARGING_LOOP_DELAY 10
+#define CHARGING_LOOP_DELAY 500
 #define BALANCING_LOOP_DELAY 10
+#define CHARGING_STOP_DELAY 5000
 
 #define CELLS_UNDER_THRESH_MASK 0x01
 #define BALANCING_DONE_MASK 0x02
 #define BALANCING_CHARGE_PRESENT_MASK 0x04
 
-#define CHARGING_TEMP_INFO_DELAY	10
-#define CHARGING_VOLT_INFO_DELAY	10
+#define CHARGING_TEMP_INFO_DELAY	100
+#define CHARGING_VOLT_INFO_DELAY	100
 
-#define BALANCING_TEMP_INFO_DELAY	10
-#define BALANCING_VOLT_INFO_DELAY	10
-#define BALANCING_BAL_INFO_DELAY	10
+#define BALANCING_TEMP_INFO_DELAY	100
+#define BALANCING_VOLT_INFO_DELAY	100
+#define BALANCING_BAL_INFO_DELAY	100
 
 
 // Info for charger CAN communication
@@ -53,11 +54,13 @@
 void charging_balancing_mode();
 void start_charging_mode();
 void stop_charging_mode();
-void start_charging();
+void charger_charging_active();
 void stop_charging();
 void start_balancing_mode();
 void stop_balancing_mode();
 int all_cells_under_threshold();
+int battery_full_and_balanced();
+
 
 
 #endif /* INC_CHARGER_H_ */

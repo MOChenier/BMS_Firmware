@@ -63,10 +63,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define COUNTER_100MS 9600
-#define COUNTER_50MS 4800
+#define COUNTER_100MS 1600
+#define COUNTER_10MS 160
 #define PSC_1000 999
-#define COUNTER_10MS 960
+#define COUNTER_50MS 800
 #define ISOLATION_FAULT_DETECT_Pin GPIO_PIN_13
 #define ISOLATION_FAULT_DETECT_GPIO_Port GPIOC
 #define PRECHARGE_CONTACTOR_Pin GPIO_PIN_0
@@ -96,6 +96,10 @@ void Error_Handler(void);
 #define LV_BATTERY_VOLTAGE_GPIO_Port GPIOB
 #define GPIO3_Pin GPIO_PIN_10
 #define GPIO3_GPIO_Port GPIOB
+#define CAN2_RX_Pin GPIO_PIN_12
+#define CAN2_RX_GPIO_Port GPIOB
+#define CAN2_TX_Pin GPIO_PIN_13
+#define CAN2_TX_GPIO_Port GPIOB
 #define YELLOW_LED_Pin GPIO_PIN_14
 #define YELLOW_LED_GPIO_Port GPIOB
 #define RED_LED_Pin GPIO_PIN_15
@@ -116,7 +120,7 @@ void Error_Handler(void);
 #define HB_10MS_PERIODS 50
 #define CHARGER_CONNECTION_10MS_PERIODS 10
 #define ASK_SLAVE_FOR_INFO_10MS_PERIODS 5
-#define SLOW_BLINKING_HV_10MS_PERIODS 50
+#define SLOW_BLINKING_HV_10MS_PERIODS 25
 #define FAST_BLINKING_HV_10MS_PERIODS 10
 
 #define MAIN_LOOP_DELAY_MS 100
@@ -126,6 +130,20 @@ void Error_Handler(void);
 #define IGNITION_MASK		0x01
 #define CHARGER_CONN_MASK	0x02
 #define EMERGENCY_STOP_MASK 0x04
+
+#define TEMP_THRESH 80
+#define TARGET_BATT_CHARG_STATE 0.98
+#define MAX_BATT_VOLTAGE 63
+#define MIN_BATT_VOLTAGE 48
+
+#define MAX_CURRENT_THRESHOLD 1380
+
+#define STANDBY_MODE 0
+#define CHARGING_BALANCING_MODE 1
+#define IN_OPERATION_MODE 2
+
+#define NUM_OF_SLAVES 2
+
 
 /* USER CODE END Private defines */
 

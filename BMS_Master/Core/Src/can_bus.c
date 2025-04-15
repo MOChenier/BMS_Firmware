@@ -7,6 +7,8 @@
 
 #include "can_bus.h"
 
+extern uint8_t message_i;
+
 CAN_TxHeaderTypeDef	TxHeader;
 uint8_t		TxData[2];
 uint32_t	TxMailbox;
@@ -16,7 +18,28 @@ uint8_t               RxData[8];
 
 uint8_t RxDatacheck = 0; //Flag that indicates that a message has been received
 
-int CAN1_send_mess(CAN_HandleTypeDef *hcan, uint8_t *TxData)
+void test_CAN_init_header(int message_i)
+{
+	if(message_i == 0){
+		TxHeader.StdId = 0x20A;
+	}
+	else if(message_i == 1){
+		TxHeader.StdId = 0x216;
+	}
+	else{
+		TxHeader.StdId = 0x21B;
+	}
+
+
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.DLC = 8;
+
+
+}
+
+
+int CAN_send_mess(CAN_HandleTypeDef *hcan, uint8_t *TxData)
 {
 
 	if (HAL_CAN_AddTxMessage(hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
@@ -75,7 +98,7 @@ void CAN_set_std_header(uint16_t std_tx_id, uint8_t dlc)
 void CAN_set_ext_header(uint32_t ext_tx_id, uint8_t dlc)
 {
 
-	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.IDE = CAN_ID_EXT;
 	TxHeader.ExtId = ext_tx_id;
 	TxHeader.DLC = dlc;
 
@@ -114,7 +137,8 @@ void CAN_Filter_Config(CAN_HandleTypeDef *hcan)
 
 void CAN_Activate_Interrupts(CAN_HandleTypeDef *hcan)
 {
-    HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY);
+//    HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
     if (__HAL_CAN_GET_FLAG(hcan, CAN_FLAG_EPV) ||
         __HAL_CAN_GET_FLAG(hcan, CAN_FLAG_BOF))
@@ -124,10 +148,10 @@ void CAN_Activate_Interrupts(CAN_HandleTypeDef *hcan)
         HAL_CAN_Init(hcan);
     }
 
-//    if (HAL_CAN_Start(hcan) != HAL_OK)
-//    {
-//        CAN_Error_Handler();
-//    }
+    if (HAL_CAN_Start(hcan) != HAL_OK)
+    {
+        CAN_Error_Handler();
+    }
 }
 
 /**

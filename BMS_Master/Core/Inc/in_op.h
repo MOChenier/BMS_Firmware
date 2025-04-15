@@ -13,22 +13,17 @@
 #include "main.h"
 
 
-
-
 #define PRECHARGE_DELAY_S	15
 #define PRECHARGE_DELAY_MS	PRECHARGE_DELAY_S*1000
 
-#define OVERLAP_DELAY_S		1
+#define OVERLAP_DELAY_S		0
 #define OVERLAP_DELAY_MS	OVERLAP_DELAY_S*1000
-
-#define MAX_CURRENT_THRESHOLD (float)(200)
 
 #define IGNITION_LOOP_DELAY_MS 10
 
-
-
 int check_if_ignition_ON(void);
 void in_operation_mode(void);
+
 
 
 #endif /* INC_IN_OP_H_ */

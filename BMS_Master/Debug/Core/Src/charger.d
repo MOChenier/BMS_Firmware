@@ -33,8 +33,9 @@ Core/Src/charger.o: ../Core/Src/charger.c ../Core/Inc/charger.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_irda.h \
- ../Core/Inc/main.h
+ ../Core/Inc/main.h ../Core/Inc/misc.h
 ../Core/Inc/charger.h:
 ../Core/Inc/slave_com.h:
 ../Core/Inc/can_bus.h:
@@ -71,5 +72,7 @@ Core/Src/charger.o: ../Core/Src/charger.c ../Core/Inc/charger.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_irda.h:
 ../Core/Inc/main.h:
+../Core/Inc/misc.h:

@@ -31,6 +31,8 @@
 #define RED_LED_PIN_GROUP			GPIOB
 #define RED_LED_PIN					GPIO_PIN_15
 
+int all_voltages_under_threshold(void);
+
 int check_if_ignition_ON(void);
 int check_if_charger_present(void);
 
@@ -38,6 +40,7 @@ void deactivate_main_contactor(void);
 void activate_main_contactor(void);
 void deactivate_precharge_contactor(void);
 void activate_precharge_contactor(void);
+float get_output_current(void);
 
 
 

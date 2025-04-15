@@ -162,7 +162,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     PB12     ------> CAN2_RX
     PB13     ------> CAN2_TX
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
+    GPIO_InitStruct.Pin = CAN2_RX_Pin|CAN2_TX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -203,7 +203,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
     PB12     ------> CAN2_RX
     PB13     ------> CAN2_TX
     */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_13);
+    HAL_GPIO_DeInit(GPIOB, CAN2_RX_Pin|CAN2_TX_Pin);
 
     /* CAN2 interrupt DeInit */
     HAL_NVIC_DisableIRQ(CAN2_TX_IRQn);
@@ -413,15 +413,15 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 }
 
 /**
-* @brief IRDA MSP Initialization
+* @brief UART MSP Initialization
 * This function configures the hardware resources used in this example
-* @param hirda: IRDA handle pointer
+* @param huart: UART handle pointer
 * @retval None
 */
-void HAL_IRDA_MspInit(IRDA_HandleTypeDef* hirda)
+void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(hirda->Instance==USART1)
+  if(huart->Instance==USART1)
   {
   /* USER CODE BEGIN USART1_MspInit 0 */
 
@@ -441,11 +441,27 @@ void HAL_IRDA_MspInit(IRDA_HandleTypeDef* hirda)
     GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* USART1 interrupt Init */
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
   /* USER CODE BEGIN USART1_MspInit 1 */
 
   /* USER CODE END USART1_MspInit 1 */
+
   }
-  else if(hirda->Instance==USART6)
+
+}
+
+/**
+* @brief IRDA MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hirda: IRDA handle pointer
+* @retval None
+*/
+void HAL_IRDA_MspInit(IRDA_HandleTypeDef* hirda)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(hirda->Instance==USART6)
   {
   /* USER CODE BEGIN USART6_MspInit 0 */
 
@@ -468,19 +484,20 @@ void HAL_IRDA_MspInit(IRDA_HandleTypeDef* hirda)
   /* USER CODE BEGIN USART6_MspInit 1 */
 
   /* USER CODE END USART6_MspInit 1 */
+
   }
 
 }
 
 /**
-* @brief IRDA MSP De-Initialization
+* @brief UART MSP De-Initialization
 * This function freeze the hardware resources used in this example
-* @param hirda: IRDA handle pointer
+* @param huart: UART handle pointer
 * @retval None
 */
-void HAL_IRDA_MspDeInit(IRDA_HandleTypeDef* hirda)
+void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 {
-  if(hirda->Instance==USART1)
+  if(huart->Instance==USART1)
   {
   /* USER CODE BEGIN USART1_MspDeInit 0 */
 
@@ -494,11 +511,24 @@ void HAL_IRDA_MspDeInit(IRDA_HandleTypeDef* hirda)
     */
     HAL_GPIO_DeInit(GPIOA, UART_MCU_TO_DEBUG_RX_Pin|UART_MCU_TO_DEBUG_TX_Pin);
 
+    /* USART1 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USART1_IRQn);
   /* USER CODE BEGIN USART1_MspDeInit 1 */
 
   /* USER CODE END USART1_MspDeInit 1 */
   }
-  else if(hirda->Instance==USART6)
+
+}
+
+/**
+* @brief IRDA MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hirda: IRDA handle pointer
+* @retval None
+*/
+void HAL_IRDA_MspDeInit(IRDA_HandleTypeDef* hirda)
+{
+  if(hirda->Instance==USART6)
   {
   /* USER CODE BEGIN USART6_MspDeInit 0 */
 
